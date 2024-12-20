@@ -14,8 +14,23 @@ dotenv.config();
 
 const app = express();
 
+const allowedOrigins = [
+  'https://beauty-shop-frontend-l8yf-63oi15cwi-denzil-serraos-projects.vercel.app',
+  'http://localhost:3000' // Add this for local development
+];
 // Middleware
-app.use(cors());
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    credentials: true, // Allow credentials (cookies, authorization headers)
+  })
+);
 app.use(express.json());
 
 // Serve static files from public directory
