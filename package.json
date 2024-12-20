@@ -5,7 +5,7 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
-    "build": "rimraf dist && mkdir dist && cp -R src dist && cp package.json dist",
+    "build": "rimraf dist && shx mkdir dist && shx cp -r src/* dist && shx cp package.json dist",
     "lint": "eslint .",
     "prepare": "npm run build"
   },
@@ -22,8 +22,10 @@
     "razorpay": "^2.9.2"
   },
   "devDependencies": {
+    "eslint": "^8.50.0",
     "nodemon": "^3.0.3",
-    "rimraf": "^5.0.0",
-    "eslint": "^8.50.0"
+    "np": "^10.1.0",
+    "rimraf": "^5.0.10",
+    "shx": "^0.3.4"
   }
 }
