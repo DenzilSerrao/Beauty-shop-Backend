@@ -1,6 +1,7 @@
+// filepath: /c:/Users/win10/Desktop/mern/project-bolt-sb1-8tfedy (18)/project/server/src/utils/invoice.js
 import PDFDocument from 'pdfkit';
 
-export const generateInvoice = async (order) => {
+export const generateInvoice = (order, user) => {
   const doc = new PDFDocument();
 
   // Header
@@ -9,8 +10,13 @@ export const generateInvoice = async (order) => {
   doc.fontSize(16).text('Invoice', { align: 'center' });
   doc.moveDown();
 
-  // Order Details
+  // User Details
   doc.fontSize(12);
+  doc.text(`Name: ${user.name}`);
+  doc.text(`Email: ${user.email}`);
+  doc.moveDown();
+
+  // Order Details
   doc.text(`Order ID: ${order._id}`);
   doc.text(`Date: ${new Date(order.createdAt).toLocaleDateString()}`);
   doc.text(`Status: ${order.status}`);
@@ -41,6 +47,5 @@ export const generateInvoice = async (order) => {
   doc.moveDown(2);
   doc.fontSize(10).text('Thank you for shopping with ANA Beauty!', { align: 'center' });
 
-  doc.end();
   return doc;
 };

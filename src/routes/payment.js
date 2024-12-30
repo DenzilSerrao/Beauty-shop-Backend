@@ -1,3 +1,4 @@
+// filepath: /c:/Users/win10/Desktop/mern/project-bolt-sb1-8tfedy (18)/project/server/src/routes/payment.js
 import express from 'express';
 import { auth } from '../middleware/auth.js';
 import { razorpay } from '../config/razorpay.js';
@@ -9,74 +10,59 @@ import { s_createOrder } from '../controllers/orders.js';
 
 const router = express.Router();
 
-// router.post('/create-order', auth, asyncHandler(async (req, res) => {
-//   const { amount, orderId } = req.body;
-//   console.log('server side create-order:',req.body)
-
-//   const options = {
-//     amount: Math.round(amount * 100), // Convert to paise and ensure integer
-//     currency: 'INR',
-//     receipt: orderId,
-//     payment_capture: 1
-//   };
-//   console.log('option:',options)
-//   const order = await razorpay.orders.create(options);
-//   console.log('order by create-order',order)
-//   res.json({
-//     id: order.id,
-//     amount: order.amount,
-//     currency: order.currency
-//   });
-// }));
-
 router.post(
   '/create-order',
   auth,
   asyncHandler(async (req, res) => {
     try {
       // Extract data from request body
-      const { amount, orderId, currency } = req.body;
+      const { userId, items, total, shippingAddress, customerEmail, customerPhone } = req.body;
 
       // Validate input data
-      if (!amount || !orderId || !currency) {
+      if (!items || !total || !shippingAddress || !customerPhone) {
         return res.status(400).json({ error: 'Invalid request data' });
       }
 
-      // Step 1: Call s_createOrder and pass relevant data
-      const orderResponse = await s_createOrder(req.body, req.user.userId);
-
-      console.log('Order Response:', orderResponse);
-
-      // Validate the response from s_createOrder
-      if (!orderResponse || orderResponse.status !== 'success') {
-        return res.status(400).json({ error: 'Order creation failed in backend' });
+      // Create order in the database
+      const orderData = { userId, items, total, shippingAddress, customerEmail, customerPhone };
+      const orderResponse = await s_createOrder(orderData);
+      if (orderResponse.status !== 'success') {
+        return res.status(500).json({ error: 'Order creation failed' });
       }
+      const order = orderResponse.data.order;
 
-      // Extract order data
-      const orderData = orderResponse.data;
-      console.log('Order Data:', orderData);
-
-      // Step 2: Prepare Razorpay order creation options
+      // Prepare Razorpay order creation options
       const options = {
-        amount: Math.round(amount * 100), // Convert to paise
-        currency: currency || 'INR',
-        receipt: orderId, // Use orderId as the receipt ID
+        amount: Math.round(order.total * 100), // Convert to paise
+        currency: 'INR',
+        receipt: order._id.toString(), // Use orderId as the receipt ID
         payment_capture: 1, // Auto-capture payment
       };
 
-      console.log('Razorpay Order Options:', options);
-
-      // Step 3: Create Razorpay order
+      // Create Razorpay order
       const razorpayOrder = await razorpay.orders.create(options);
-      console.log('Razorpay Order Created:', razorpayOrder);
 
-      // Step 4: Send the Razorpay order details to the client
-      return res.status(200).json({
-        id: razorpayOrder.id,
+      // Prepare the complete JSON object for Razorpay checkout
+      const payOptions = {
+        key: process.env.RAZORPAY_KEY_ID, // Pull from .env
         amount: razorpayOrder.amount,
         currency: razorpayOrder.currency,
-        receipt: razorpayOrder.receipt,
-      });
+        name: 'Ana Beauty',
+        description: 'Test Transaction',
+        order_id: razorpayOrder.id, // This is the order_id created in the backend
+        // callback_url: '/orders', // Your success URL
+        prefill: {
+          email: customerEmail,
+          contact: customerPhone
+        },
+        theme: {
+          color: '#F37254'
+        },
+        orderId: order._id, // Include the order ID from the database
+        total: order.total // Include the total amount
+      };
+      // Send the payOptions to the client
+      return res.status(200).json(payOptions);
     } catch (error) {
       console.error('Error in /create-order:', error.message);
       return res.status(500).json({ error: 'Internal server error' });

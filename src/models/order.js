@@ -3,11 +3,11 @@ import mongoose from 'mongoose';
 const orderSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   items: [{
-    // productId: { type: Number, required: true },
+    _id: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true },
     name: { type: String, required: true },
+    salePrice: { type: Number, required: true },
     price: { type: Number, required: true },
     quantity: { type: Number, required: true },
-    // image: { type: String, required: true }
   }],
   customerPhone: { type: String, required: true },
   total: { type: Number, required: true },
@@ -20,5 +20,10 @@ const orderSchema = new mongoose.Schema({
 }, {
   timestamps: true
 });
+
+// Static method to find orders by user
+orderSchema.statics.findByUser = function (userId) {
+  return this.find({ userId });
+};
 
 export const Order = mongoose.model('Order', orderSchema);

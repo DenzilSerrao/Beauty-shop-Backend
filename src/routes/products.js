@@ -5,9 +5,11 @@ import fs from 'fs';
 import { auth } from '../middleware/auth.js';
 import { Product } from '../models/product.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
+import { getProducts } from '../controllers/products.js';
 
 const router = express.Router();
 
+router.get('/', getProducts);
 // Configure multer for image uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -37,18 +39,19 @@ const upload = multer({
 });
 
 // Public routes
-router.get('/', asyncHandler(async (req, res) => {
-  const products = await Product.find({ isActive: true });
-  res.json(products);
-}));
+// router.get('/', asyncHandler(async (req, res) => {
+//   const products = await Product.find({ isActive: true });
+//   res.json(products);
+// }));
 
 // Admin routes
 router.use(auth);
 
-router.post('/', auth, upload.array('images', 6), asyncHandler(async (req, res) => {
-  if (req.user.role !== 'admin') {
-    return res.status(403).json({ message: 'Unauthorized' });
-  }
+router.post('/upload', auth, upload.array('images', 6), asyncHandler(async (req, res) => {
+  // console.log(req.user);
+  // if (req.user.role !== 'admin') {
+  //   return res.status(403).json({ message: 'Unauthorized as not admin' });
+  // }
 
   const imageUrls = req.files.map(file => ({
     url: `/products/${file.filename}`,
@@ -64,9 +67,9 @@ router.post('/', auth, upload.array('images', 6), asyncHandler(async (req, res) 
 }));
 
 router.put('/:id', auth, upload.array('images', 6), asyncHandler(async (req, res) => {
-  if (req.user.role !== 'admin') {
-    return res.status(403).json({ message: 'Unauthorized' });
-  }
+  // if (req.user.role !== 'admin') {
+  //   return res.status(403).json({ message: 'Unauthorized' });
+  // }
 
   const product = await Product.findById(req.params.id);
   if (!product) {

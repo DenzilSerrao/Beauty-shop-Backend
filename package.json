@@ -4,13 +4,9 @@
   "type": "module",
   "scripts": {
     "start": "node src/server.js",
-    "dev": "nodemon src/server.js",
-    "build": "rimraf dist && shx mkdir dist && shx cp -r src/* dist && shx cp package.json dist",
-    "lint": "eslint .",
-    "prepare": "npm run build"
+    "dev": "nodemon src/server.js"
   },
   "dependencies": {
-    "bcrypt": "^5.1.1",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
@@ -23,10 +19,6 @@
     "razorpay": "^2.9.2"
   },
   "devDependencies": {
-    "eslint": "^8.50.0",
-    "nodemon": "^3.0.3",
-    "np": "^10.1.0",
-    "rimraf": "^5.0.10",
-    "shx": "^0.3.4"
+    "nodemon": "^3.0.3"
   }
 }
