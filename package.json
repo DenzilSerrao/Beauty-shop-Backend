@@ -3,11 +3,11 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "start": "node src/server.js",
-    "dev": "nodemon src/server.js",
-    "build": "rimraf dist && shx mkdir dist && shx cp -r src/* dist && shx cp package.json dist",
-    "lint": "eslint .",
-    "prepare": "npm run build"
+    "start": "node src/server.js",       
+    "dev": "nodemon src/server.js",     
+    "build": "rimraf dist && mkdir dist && cp -r src dist", 
+    "lint": "eslint .",                 
+    "prepare": "npm run build"        
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
