@@ -51,14 +51,14 @@ app.use(express.static(path.join(process.cwd(), 'public')));
 connectDB();
 
 // Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/orders', orderRoutes);
-app.use('/api/payment', paymentRoutes);
-app.use('/api/products', productRoutes);
-app.get('/', (req, res) => {
+app.use('/ana-beauty/api/auth', authRoutes);
+app.use('/ana-beauty/api/orders', orderRoutes);
+app.use('/ana-beauty/api/payment', paymentRoutes);
+app.use('/ana-beauty/api/products', productRoutes);
+app.get('/ana-beauty/', (req, res) => {
   res.send('Hello World!')
 })
-app.use('/api/admin', adminRoutes);
+app.use('/ana-beauty/api/admin', adminRoutes);
 // Error handling middleware
 app.use(errorHandler);
 

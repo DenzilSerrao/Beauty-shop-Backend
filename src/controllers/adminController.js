@@ -3,7 +3,17 @@ import { asyncHandler } from '../utils/asyncHandler.js';
 import { Order } from '../models/order.js';
 
 export const getAllOrders = asyncHandler(async (req, res) => {
-  const orders = await Order.find({ status: 'processing' }).populate('userId', 'name email');
+  const processingAndShippingOrders = await Order.find({
+    $or: [{ status: 'processing' }, { status: 'shipped' }]
+  }).populate('userId', 'name email');
+
+  const deliveredOrders = await Order.find({ status: 'delivered' })
+    .sort({ createdAt: -1 })
+    .limit(20)
+    .populate('userId', 'name email');
+
+  const orders = [...processingAndShippingOrders, ...deliveredOrders];
+
   res.json({
     status: 'success',
     data: { orders }
@@ -35,3 +45,17 @@ export const AdmindeleteOrder = asyncHandler(async (req, res) => {
     message: 'Order deleted successfully'
   });
 });
+
+export const updateOrderStatus = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const { status } = req.body;
+    const order = await Order.findByIdAndUpdate(orderId, { status }, { new: true });
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+    res.status(200).json(order);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
