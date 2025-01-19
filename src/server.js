@@ -35,6 +35,7 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));  // This handles preflight (OPTIONS) requests globally
 
 app.use(express.json());
 
