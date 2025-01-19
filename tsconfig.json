@@ -10,6 +10,6 @@
     "outDir": "dist",
     "rootDir": "src"
   },
-  "include": ["src/**/*", "src/controllers", "types", "routes", "services", "utils"],
+  "include": ["src/**/*", "controllers", "src/types", "routes", "services", "utils"],
   "exclude": ["node_modules"]
 }
