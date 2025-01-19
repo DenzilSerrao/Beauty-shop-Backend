@@ -1,20 +1,19 @@
 import { connectDB } from '../../lib/db.js';
 import { User } from '../../src/models/user.js';
-import jwt from 'jsonwebtoken'; // Corrected import (remove .js)
+import jwt from 'jsonwebtoken';
 
 export default async function handler(req, res) {
-  // CORS headers
-  res.setHeader('Access-Control-Allow-Origin', 'https://beauty-shop-frontend-l8yf.vercel.app'); // Your frontend domain
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+  // Set CORS headers
+  res.setHeader('Access-Control-Allow-Origin', 'https://beauty-shop-frontend-l8yf.vercel.app');
+  res.setHeader('Access-Control-Allow-Methods', 'POST');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.setHeader('Access-Control-Allow-Credentials', 'true'); // If you want to allow cookies or credentials
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
 
   // Handle preflight request (OPTIONS)
   if (req.method === 'OPTIONS') {
-    return res.status(200).end(); // Send a 200 response for OPTIONS requests
+    return res.status(200).end();
   }
 
-  // Only allow POST requests
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -24,16 +23,15 @@ export default async function handler(req, res) {
 
     const { email, password } = req.body;
 
-    // Find the user by email
+    // Check if the user exists
     const user = await User.findOne({ email });
     if (!user || !(await user.comparePassword(password))) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    // Generate JWT token with expiry
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' }); // Optionally, set expiration time
+    // Generate JWT token with expiration
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
-    // Respond with user info and JWT token
     res.status(200).json({
       user: {
         id: user._id,
