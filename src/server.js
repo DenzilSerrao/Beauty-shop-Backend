@@ -15,35 +15,25 @@ dotenv.config();
 
 const app = express();
 
-// const allowedOrigins = [
-//   'https://beauty-shop-frontend-l8yf-63oi15cwi-denzil-serraos-projects.vercel.app',
-//   'http://localhost:5000' // Add this for local development
-// ];
-// Middleware
-// app.use(
-//   cors(
-//   //   {
-//   //   origin: (origin, callback) => {
-//   //     if (!origin || allowedOrigins.includes(origin)) {
-//   //       callback(null, true);
-//   //     } else {
-//   //       callback(new Error('Not allowed by CORS'));
-//   //     }
-//   //   },
-//   //   credentials: true, // Allow credentials (cookies, authorization headers)
-//   // }
-// )
-// );
+const allowedOrigins = [
+  'https://beauty-shop-frontend-l8yf.vercel.app',  // First frontend domain
+  'https://www.anabeauty.co.in',  // New domain
+  'http://localhost:5173' // Add this for local development
+];
 
-// CORS configuration
 const corsOptions = {
-  origin: ['https://beauty-shop-frontend-l8yf.vercel.app'], // Allow requests only from this origin
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],                // Allowed HTTP methods
-  credentials: true,                                        // Allow cookies if needed
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 };
 
-// Use CORS middleware
-app.use(cors());
+app.use(cors(corsOptions));
 
 app.use(express.json());
 
