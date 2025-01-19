@@ -3,12 +3,12 @@ import cors from 'cors';
 import path from 'path';
 import dotenv from 'dotenv';
 import { connectDB } from './config/database.js';
-import { errorHandler } from './utils/errors.js';
-import authRoutes from './routes/auth.js';
-import orderRoutes from './routes/orders.js';
-import paymentRoutes from './routes/payment.js';
-import productRoutes from './routes/products.js';
-import adminRoutes from './routes/adminRoutes.js';
+import { errorHandler } from '../utils/errors.js';
+import authRoutes from '../routes/auth.js';
+import orderRoutes from '../routes/orders.js';
+import paymentRoutes from '../routes/payment.js';
+import productRoutes from '../routes/products.js';
+import adminRoutes from '../routes/adminRoutes.js';
 
 // Load environment variables before any other imports
 dotenv.config();

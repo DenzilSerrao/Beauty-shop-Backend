@@ -1,16 +1,19 @@
 import jwt from 'jsonwebtoken';
+import { AuthenticationError } from '../utils/errors.js';
+import { asyncHandler } from '../utils/asyncHandler.js';
 
-export async function auth(req, res) {
+export const auth = asyncHandler(async (req, res, next) => {
+  const token = req.header('Authorization')?.replace('Bearer ', '');
+  
+  if (!token) {
+    throw new AuthenticationError('No authentication token provided');
+  }
+
   try {
-    const token = req.headers.authorization?.replace('Bearer ', '');
-    if (!token) {
-      return { error: 'No authentication token' };
-    }
-
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = decoded;
-    return null;
+    next();
   } catch (error) {
-    return { error: 'Invalid authentication token' };
+    throw new AuthenticationError('Invalid authentication token');
   }
-}
+});
