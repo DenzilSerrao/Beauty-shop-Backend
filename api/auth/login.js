@@ -1,6 +1,6 @@
 import { connectDB } from '../../lib/db.js';
-import { User } from '../../models/user';
-import jwt from 'jsonwebtoken';
+import { User } from '../../models/user.js';
+import jwt from 'jsonwebtoken.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {

@@ -1,6 +1,6 @@
 import { connectDB } from '../../lib/db.js';
-import { Order } from '../../models/order';
-import { auth } from '../../middleware/auth';
+import { Order } from '../../models/order.js';
+import { auth } from '../../middleware/auth.js';
 
 export default async function handler(req, res) {
   try {
