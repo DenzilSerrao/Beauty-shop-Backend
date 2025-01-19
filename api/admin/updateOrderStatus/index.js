@@ -1,6 +1,6 @@
 // api/admin/updateOrderStatus.js
 
-import { updateOrderStatus } from '../../controllers/adminController.js';
+import { updateOrderStatus } from '../../../controllers/adminController.js';
 
 export default async function handler(req, res) {
   const { orderId } = req.query;
