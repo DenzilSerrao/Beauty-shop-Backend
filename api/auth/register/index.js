@@ -1,4 +1,5 @@
 import { register } from '../../../controllers/auth.js';
+import { corsMiddleware } from '../../middleware/corsMiddleware.js';
 
 export default async function handler(req, res) {
   // Apply CORS

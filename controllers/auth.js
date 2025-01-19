@@ -29,7 +29,7 @@ export const register = asyncHandler(async (req, res) => {
 
 export const login = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
-
+  console.log('body:', req.body);
   if (!email || !password) {
     throw new ValidationError('Email and password are required');
   }
@@ -38,7 +38,7 @@ export const login = asyncHandler(async (req, res) => {
   if (!user || !(await user.comparePassword(password))) {
     throw new AuthenticationError('Invalid credentials');
   }
-
+  console.log('user:', user);
   const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET);
 
   res.json({
