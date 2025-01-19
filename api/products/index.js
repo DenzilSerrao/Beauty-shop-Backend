@@ -1,4 +1,4 @@
-import { connectDB } from '../../lib/db';
+import { connectDB } from '../../lib/db.js';
 import { Product } from '../../models/product';
 import { auth } from '../../middleware/auth';
 

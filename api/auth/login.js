@@ -1,4 +1,4 @@
-import { connectDB } from '../../lib/db';
+import { connectDB } from '../../lib/db.js';
 import { User } from '../../models/user';
 import jwt from 'jsonwebtoken';
 
