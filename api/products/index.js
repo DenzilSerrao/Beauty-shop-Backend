@@ -1,17 +1,12 @@
 import { connectDB } from '../../lib/db.js';
 import { Product } from '../../models/product.js';
 import { auth } from '../../middleware/auth.js';
+import { corsMiddleware } from '../../middleware/corsMiddleware.js';
 
 export default async function handler(req, res) {
-  // CORS Headers
-  res.setHeader('Access-Control-Allow-Origin', 'https://beauty-shop-frontend-l8yf.vercel.app'); // Your frontend domain
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.setHeader('Access-Control-Allow-Credentials', 'true'); // If you want to allow cookies or credentials
-
-  // Handle preflight request
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end(); // Send a 200 response for OPTIONS requests
+  // Apply CORS middleware
+  if (corsMiddleware(req, res)) {
+    return; // Exit if the CORS middleware has handled the request
   }
 
   try {
@@ -21,7 +16,7 @@ export default async function handler(req, res) {
       case 'GET':
         const products = await Product.find();
         console.log('products:', products);
-        res.status(200).json({ data: { products } });
+        return res.status(200).json({ data: { products } });
 
       case 'POST':
         // Verify admin auth
