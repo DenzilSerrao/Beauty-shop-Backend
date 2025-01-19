@@ -1,11 +1,11 @@
-// api/auth/login.js
+// api/auth/verify.js
 
-import { login } from '../../src/controllers/auth.js';
+import { verifyToken } from '../../src/controllers/auth.controller.js';
 
 export default async function handler(req, res) {
   if (req.method === 'POST') {
     try {
-      const response = await login(req, res);
+      const response = await verifyToken(req, res);
       res.status(response.status).json(response.data);
     } catch (error) {
       res.status(500).json({ error: error.message });

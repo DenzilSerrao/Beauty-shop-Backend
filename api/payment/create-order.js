@@ -1,12 +1,12 @@
-// api/auth/login.js
+// api/payment/create-order.js
 
-import { login } from '../../src/controllers/auth.js';
+import { s_createOrder } from '../../src/controllers/orders.js';
 
 export default async function handler(req, res) {
   if (req.method === 'POST') {
     try {
-      const response = await login(req, res);
-      res.status(response.status).json(response.data);
+      const order = await s_createOrder(req, res);
+      res.status(201).json(order);
     } catch (error) {
       res.status(500).json({ error: error.message });
     }

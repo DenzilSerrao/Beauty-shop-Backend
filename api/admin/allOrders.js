@@ -1,12 +1,12 @@
-// api/auth/login.js
+// api/admin/allOrders.js
 
-import { login } from '../../src/controllers/auth.js';
+import { getAllOrders } from '../../src/controllers/adminController.js';
 
 export default async function handler(req, res) {
-  if (req.method === 'POST') {
+  if (req.method === 'GET') {
     try {
-      const response = await login(req, res);
-      res.status(response.status).json(response.data);
+      const orders = await getAllOrders(req, res);
+      res.status(200).json(orders);
     } catch (error) {
       res.status(500).json({ error: error.message });
     }

@@ -1,38 +1,23 @@
-import { connectDB } from '../../lib/db.js';
-import { Order } from '../../src/models/order.js';
-import { auth } from '../../middleware/auth.js';
+// api/orders/index.js
+
+import { getOrders, s_createOrder } from '../../src/controllers/orders.js';
 
 export default async function handler(req, res) {
-
-  try {
-    const authResult = await auth(req, res);
-    if (authResult?.error) {
-      return res.status(401).json({ error: authResult.error });
+  if (req.method === 'GET') {
+    try {
+      const orders = await getOrders(req, res);
+      res.status(200).json(orders);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
     }
-
-    await connectDB();
-
-    switch (req.method) {
-      case 'GET':
-        const orders = await Order.findByUser(req.user.userId);
-  
-        res.json({
-          status: 'success',
-          data: { orders }
-        });
-
-      case 'POST':
-        const order = await Order.create({
-          ...req.body,
-          userId: req.user.userId
-        });
-        return res.status(201).json(order);
-
-      default:
-        return res.status(405).json({ error: 'Method not allowed' });
+  } else if (req.method === 'POST') {
+    try {
+      const order = await s_createOrder(req, res);
+      res.status(201).json(order);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
     }
-  } catch (error) {
-    console.error('Orders error:', error);
-    return res.status(500).json({ error: 'Internal server error' });
+  } else {
+    res.status(405).json({ error: 'Method Not Allowed' });
   }
 }
