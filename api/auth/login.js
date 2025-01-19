@@ -4,10 +4,10 @@ import jwt from 'jsonwebtoken'; // Corrected import (remove .js)
 
 export default async function handler(req, res) {
   // CORS headers
-  res.setHeader('Access-Control-Allow-Origin', 'https://beauty-shop-frontend-l8yf.vercel.app'); // Your frontend URL
-  res.setHeader('Access-Control-Allow-Methods', 'POST');
+  res.setHeader('Access-Control-Allow-Origin', 'https://beauty-shop-frontend-l8yf.vercel.app'); // Your frontend domain
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.setHeader('Access-Control-Allow-Credentials', 'true'); // Allow credentials (cookies) if needed
+  res.setHeader('Access-Control-Allow-Credentials', 'true'); // If you want to allow cookies or credentials
 
   // Handle preflight request (OPTIONS)
   if (req.method === 'OPTIONS') {
