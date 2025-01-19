@@ -1,6 +1,6 @@
 // api/orders/[orderId]/invoice.js
 
-import { generateOrderInvoice } from '../../src/controllers/orders.js';
+import { generateOrderInvoice } from '../../controllers/orders.js';
 
 export default async function handler(req, res) {
   const { orderId } = req.query;

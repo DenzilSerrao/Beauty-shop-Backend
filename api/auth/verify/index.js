@@ -1,6 +1,6 @@
 // api/auth/verify.js
 
-import { verifyToken } from '../../src/controllers/auth.controller.js';
+import { verifyToken } from '../../controllers/auth.controller.js';
 
 export default async function handler(req, res) {
   if (req.method === 'POST') {

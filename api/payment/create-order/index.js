@@ -1,6 +1,6 @@
 // api/payment/create-order.js
 
-import { s_createOrder } from '../../src/controllers/orders.js';
+import { s_createOrder } from '../../controllers/orders.js';
 
 export default async function handler(req, res) {
   if (req.method === 'POST') {

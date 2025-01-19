@@ -1,6 +1,6 @@
 // api/admin/[orderId].js
 
-import { AdmingetOrder, AdmindeleteOrder } from '../../src/controllers/adminController.js';
+import { AdmingetOrder, AdmindeleteOrder } from '../../controllers/adminController.js';
 
 export default async function handler(req, res) {
   const { orderId } = req.query;

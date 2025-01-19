@@ -1,6 +1,6 @@
 // api/orders/index.js
 
-import { getOrders, s_createOrder } from '../../src/controllers/orders.js';
+import { getOrders, s_createOrder } from '../../controllers/orders.js';
 
 export default async function handler(req, res) {
   if (req.method === 'GET') {

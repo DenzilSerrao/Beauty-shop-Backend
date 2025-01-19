@@ -1,6 +1,6 @@
 // api/orders/[orderId].js
 
-import { getOrder, deleteOrder, updateOrderStatus } from '../../src/controllers/orders.js';
+import { getOrder, deleteOrder, updateOrderStatus } from '../../controllers/orders.js';
 
 export default async function handler(req, res) {
   const { orderId } = req.query;

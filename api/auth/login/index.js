@@ -1,6 +1,6 @@
 // api/auth/login.js
 
-import { login } from '../../src/controllers/auth.js';
+import { login } from '../../controllers/auth.js';
 
 export default async function handler(req, res) {
   if (req.method === 'POST') {

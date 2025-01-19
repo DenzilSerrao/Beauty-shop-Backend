@@ -1,6 +1,6 @@
 // api/products/index.js
 
-import { getProducts, createProduct } from '../../src/controllers/products.js';
+import { getProducts, createProduct } from '../../controllers/products.js';
 
 export default async function handler(req, res) {
   if (req.method === 'GET') {
