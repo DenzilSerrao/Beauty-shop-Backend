@@ -1,5 +1,5 @@
 import { connectDB } from '../../lib/db.js';
-import { Product } from '../../src/models/product.js';
+import { Product } from '../../models/product.js';
 import { auth } from '../../middleware/auth.js';
 
 export default async function handler(req, res) {
