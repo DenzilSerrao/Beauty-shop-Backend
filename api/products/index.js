@@ -21,7 +21,7 @@ export default async function handler(req, res) {
       case 'GET':
         const products = await Product.find();
         console.log('products:', products);
-        return res.status(200).json({ products });
+        res.status(200).json({ data: { products } });
 
       case 'POST':
         // Verify admin auth

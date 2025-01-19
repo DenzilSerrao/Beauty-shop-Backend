@@ -24,8 +24,12 @@ export default async function handler(req, res) {
 
     switch (req.method) {
       case 'GET':
-        const orders = await Order.find({ userId: req.user.userId });
-        return res.status(200).json({ orders });
+        const orders = await Order.findByUser(req.user.userId);
+  
+        res.json({
+          status: 'success',
+          data: { orders }
+        });
 
       case 'POST':
         const order = await Order.create({
