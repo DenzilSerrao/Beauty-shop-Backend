@@ -20,20 +20,31 @@ const app = express();
 //   'http://localhost:5000' // Add this for local development
 // ];
 // Middleware
-app.use(
-  cors(
-  //   {
-  //   origin: (origin, callback) => {
-  //     if (!origin || allowedOrigins.includes(origin)) {
-  //       callback(null, true);
-  //     } else {
-  //       callback(new Error('Not allowed by CORS'));
-  //     }
-  //   },
-  //   credentials: true, // Allow credentials (cookies, authorization headers)
-  // }
-)
-);
+// app.use(
+//   cors(
+//   //   {
+//   //   origin: (origin, callback) => {
+//   //     if (!origin || allowedOrigins.includes(origin)) {
+//   //       callback(null, true);
+//   //     } else {
+//   //       callback(new Error('Not allowed by CORS'));
+//   //     }
+//   //   },
+//   //   credentials: true, // Allow credentials (cookies, authorization headers)
+//   // }
+// )
+// );
+
+// CORS configuration
+const corsOptions = {
+  origin: ['https://beauty-shop-frontend-l8yf.vercel.app'], // Allow requests only from this origin
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],                // Allowed HTTP methods
+  credentials: true,                                        // Allow cookies if needed
+};
+
+// Use CORS middleware
+app.use(cors(corsOptions));
+
 app.use(express.json());
 
 // app.use((req, res, next) => {
