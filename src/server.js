@@ -34,7 +34,7 @@ const corsOptions = {
   allowedHeaders: ['Content-Type', 'Authorization'],
 };
 
-app.use(cors(corsOptions));
+app.use(cors());
 app.options('*', cors(corsOptions));  // This handles preflight (OPTIONS) requests globally
 
 app.use(express.json());
