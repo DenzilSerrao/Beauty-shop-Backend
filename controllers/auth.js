@@ -74,3 +74,35 @@ export const login = asyncHandler(async (req, res) => {
     },
   });
 });
+
+export const verifyToken = asyncHandler(async (req, res) => {
+  const token = req.headers.authorization?.split(' ')[1];
+
+  if (!token) {
+    throw new AuthenticationError('No token provided');
+  }
+
+  try {
+    // Ensure database connection is established
+    await connectDB();
+
+    // Verify the token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    // Find the user by the decoded user ID
+    const user = await User.findById(decoded.userId).exec();
+
+    if (!user) {
+      throw new AuthenticationError('User not found');
+    }
+
+    // Token is valid and user exists
+    res.json({
+      status: 'success',
+      data: { valid: true, user: { id: user.id, name: user.name, email: user.email, role: user.role } },
+    });
+  } catch (error) {
+    console.error('Token verification error:', error);
+    throw new AuthenticationError('Invalid token');
+  }
+});

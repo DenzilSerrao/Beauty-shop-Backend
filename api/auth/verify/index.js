@@ -1,17 +1,20 @@
-import { verifyToken } from '../../../controllers/auth.js';
+import { verifyToken } from '../../../controllers/auth.js'; // Ensure the path is correct
+import { corsMiddleware } from '../../../middleware/corsMiddleware.js';
 
 export default async function handler(req, res) {
-  // Apply CORS
-  corsMiddleware(req, res, async () => {
-    if (req.method === 'POST') {
-      try {
-        const response = await verifyToken(req, res);
-        res.status(response.status).json(response.data);
-      } catch (error) {
-        res.status(500).json({ error: error.message });
-      }
-    } else {
-      res.status(405).json({ error: 'Method Not Allowed' });
+  // Apply CORS middleware
+  if (corsMiddleware(req, res)) {
+    return; // Exit if the CORS middleware has handled the request
+  }
+
+  if (req.method === 'POST') {
+    try {
+      await verifyToken(req, res);
+    } catch (error) {
+      console.error('Verify token error:', error);
+      res.status(500).json({ error: error.message });
     }
-  });
+  } else {
+    res.status(405).json({ error: 'Method Not Allowed' });
+  }
 }
