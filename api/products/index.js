@@ -1,7 +1,6 @@
-import { connectDB } from '../../lib/db.js';
-import { Product } from '../../models/product.js';
-import { auth } from '../../middleware/auth.js';
+import { getProducts, createProduct, updateProduct } from '../../controllers/products.js'; // Ensure the path is correct
 import { corsMiddleware } from '../../middleware/corsMiddleware.js';
+import { connectDB } from '../../lib/db.js';
 
 export default async function handler(req, res) {
   // Apply CORS middleware
@@ -10,23 +9,20 @@ export default async function handler(req, res) {
   }
 
   try {
+    // Ensure the database connection is established
     await connectDB();
-
     switch (req.method) {
       case 'GET':
-        const products = await Product.find();
-        console.log('products:', products);
-        return res.status(200).json({ data: { products } });
+        await getProducts(req, res);
+        break;
 
       case 'POST':
-        // Verify admin auth
-        const authResult = await auth(req, res);
-        if (authResult?.error) {
-          return res.status(401).json({ error: authResult.error });
-        }
+        await createProduct(req, res);
+        break;
 
-        const product = await Product.create(req.body);
-        return res.status(201).json(product);
+      case 'PUT':
+        await updateProduct(req, res);
+        break;
 
       default:
         return res.status(405).json({ error: 'Method not allowed' });

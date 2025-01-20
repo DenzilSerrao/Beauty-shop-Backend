@@ -41,9 +41,7 @@ export const login = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
   // Ensure DB connection is established before queries
-  console.log('Connecting to DB...');
   await connectDB();
-  console.log('Connected to DB');
 
   // Validate required fields
   if (!email || !password) {
@@ -51,9 +49,7 @@ export const login = asyncHandler(async (req, res) => {
   }
 
   // Find the user by email
-  console.log('Query running...');
-  const user = await User.findByEmail(email);  // This resolves the promise
-  console.log('user:', user);
+  const user = await User.findOne({ email }).exec(); // Using `.exec()` to ensure query execution
 
   // Validate user existence
   if (!user) {
@@ -61,10 +57,10 @@ export const login = asyncHandler(async (req, res) => {
   }
 
   // Compare password
-  // const isMatch = await User.comparePassword(password);
-  // if (!isMatch) {
-  //   throw new AuthenticationError('Invalid credentials');
-  // }
+  const isMatch = await user.comparePassword(password); // Assuming comparePassword is a method on the User instance
+  if (!isMatch) {
+    throw new AuthenticationError('Invalid credentials');
+  }
 
   // Generate JWT token with expiration time of 1 hour
   const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
@@ -77,7 +73,4 @@ export const login = asyncHandler(async (req, res) => {
       token,
     },
   });
-
-  // Make sure no other response is sent after this (no further res.json() or res.send())
 });
-
