@@ -1,12 +1,21 @@
 import { getOrders, s_createOrder } from '../../controllers/orders.js';
 import { corsMiddleware } from '../../middleware/corsMiddleware.js';
+import { connectDB } from '../../lib/db.js';
 
 export default async function handler(req, res) {
   // Apply CORS middleware
   if (corsMiddleware(req, res)) {
     return; // Exit if the CORS middleware has handled the request
   }
-
+  // Ensure database connection is established before proceeding
+  try {
+    console.log('Attempting to connect to the database...');
+    await connectDB();
+    console.log('Database connection established successfully');
+  } catch (dbError) {
+    console.error('Database connection failed:', dbError);
+    return res.status(500).json({ error: 'Failed to connect to the database' });
+  }
   if (req.method === 'GET') {
     try {
       const orders = await getOrders(req, res);
