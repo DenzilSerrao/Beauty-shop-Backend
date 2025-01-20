@@ -14,7 +14,7 @@ export const getOrders = asyncHandler(async (userId, req, res) => {
     if (!mongoose.Types.ObjectId.isValid(userId)) {
       throw new ValidationError('Invalid user ID');
     }
-
+    console.log('Fetching orders from:',userId)
     const orders = await Order.findByUser(userId);
     console.log('Orders fetched:', orders);
     return {
