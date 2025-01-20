@@ -18,8 +18,7 @@ export const getOrders = asyncHandler(async (userId, req, res) => {
     console.log('Fetching orders from:', userId);
 
     // Execute the query
-    // const orders = await Order.findByUser(userId).exec();
-    const orders = await Order.find({ userId }).populate('_id').exec();
+    const orders = await Order.findByUser(userId).exec();
     console.log('Orders query executed:', orders);
 
     if (!orders || orders.length === 0) {

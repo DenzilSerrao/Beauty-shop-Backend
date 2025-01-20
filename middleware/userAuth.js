@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
 import { connectDB } from '../lib/db.js';
 import { User } from '../models/user.js';
+import { Order } from '../models/order.js';
 
 export default async function userAuth(req, res) {
   try {
@@ -23,7 +24,8 @@ export default async function userAuth(req, res) {
         console.log('User not found');
         return { error: 'User not found' };
       }
-
+      const orders = await Order.findByUser(decoded.userId).exec();
+      console.log('Orders:', orders);
       req.user = user;
       console.log('User authenticated successfully:', user.id);
       return { success: true };
