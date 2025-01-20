@@ -1,16 +1,30 @@
-// api/admin/allOrders.js
-
-import { getAllOrders } from '../../../controllers/adminController.js';
+import { getAllOrders, updateOrderStatus } from '../../../../controllers/adminController.js'; // Ensure the path is correct
+import { corsMiddleware } from '../../../../middleware/corsMiddleware.js';
+import { isAdminAuth } from '../../../../middleware/isAdminAuth.js';
 
 export default async function handler(req, res) {
-  if (req.method === 'GET') {
-    try {
-      const orders = await getAllOrders(req, res);
-      res.status(200).json(orders);
-    } catch (error) {
-      res.status(500).json({ error: error.message });
+  // Apply CORS middleware
+  if (corsMiddleware(req, res)) {
+    return; // Exit if the CORS middleware has handled the request
+  }
+
+  // Verify admin auth
+  const authResult = await isAdminAuth(req, res);
+  if (authResult?.error) {
+    return res.status(401).json({ error: authResult.error });
+  }
+
+  try {
+    switch (req.method) {
+      case 'GET':
+        await getAllOrders(req, res);
+        break;
+
+      default:
+        return res.status(405).json({ error: 'Method Not Allowed' });
     }
-  } else {
-    res.status(405).json({ error: 'Method Not Allowed' });
+  } catch (error) {
+    console.error('Admin orders error:', error);
+    return res.status(500).json({ error: 'Internal server error' });
   }
 }
