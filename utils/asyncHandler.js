@@ -1,4 +1,10 @@
-// Wrapper for async route handlers to catch errors
-export const asyncHandler = (fn) => (req, res, next) => {
-  Promise.resolve(fn(req, res, next)).catch(next);
+export const asyncHandler = (fn) => (req, res) => {
+  Promise.resolve(fn(req, res)).catch((err) => {
+    // Make sure to send a proper response in case of an error
+    console.error(err);  // log the error for debugging purposes
+    res.status(500).json({
+      status: 'error',
+      message: err.message || 'Internal Server Error',
+    });
+  });
 };

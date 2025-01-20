@@ -1,14 +1,23 @@
-export const corsMiddleware = (req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', 'https://beauty-shop-frontend-l8yf.vercel.app'); // Your frontend domain
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.setHeader('Access-Control-Allow-Credentials', 'true'); // Allow cookies or credentials
+export const corsHeaders = {
+  'Access-Control-Allow-Origin': 'https://beauty-shop-frontend-l8yf.vercel.app,https://www.anabeauty.co.in,https://anabeauty.co.in,http://localhost:5173',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  'Access-Control-Allow-Credentials': 'true'
+};
 
-  // Handle preflight (OPTIONS) requests
+export const corsMiddleware = (req, res) => {
+  // Check if the request method is OPTIONS (preflight request)
   if (req.method === 'OPTIONS') {
-    res.status(200).end(); // End the response for OPTIONS requests
+    res.writeHead(200, corsHeaders);
+    res.end();
     return true; // Signal that the request has been fully handled
   }
+
+  // Set CORS headers for the actual request
+  res.setHeader('Access-Control-Allow-Origin', corsHeaders['Access-Control-Allow-Origin']);
+  res.setHeader('Access-Control-Allow-Methods', corsHeaders['Access-Control-Allow-Methods']);
+  res.setHeader('Access-Control-Allow-Headers', corsHeaders['Access-Control-Allow-Headers']);
+  res.setHeader('Access-Control-Allow-Credentials', corsHeaders['Access-Control-Allow-Credentials']);
 
   return false; // Signal that the request needs further processing
 };
