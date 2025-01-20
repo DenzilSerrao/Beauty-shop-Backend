@@ -1,6 +1,5 @@
-// api/orders/index.js
-
 import { getOrders, s_createOrder } from '../../controllers/orders.js';
+import { corsMiddleware } from '../../middleware/corsMiddleware.js';
 
 export default async function handler(req, res) {
   // Apply CORS middleware

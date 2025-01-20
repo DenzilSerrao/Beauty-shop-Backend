@@ -1,4 +1,4 @@
-import { getOrderInvoice } from '../../../../controllers/orderController.js'; // Ensure the path is correct
+import { getOrderInvoice } from '../../../../controllers/orders.js'; // Ensure the path is correct
 import { corsMiddleware } from '../../../../middleware/corsMiddleware.js';
 
 export default async function handler(req, res) {

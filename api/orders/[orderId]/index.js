@@ -1,7 +1,5 @@
 import { getOrder, deleteOrder } from '../../../controllers/orders.js';
 import { corsMiddleware } from '../../../middleware/corsMiddleware.js';
-import { userAuth } from '../../../middleware/userAuth.js';
-import { connectDB } from '../../../lib/db.js';
 
 export default async function handler(req, res) {
   // Apply CORS middleware
