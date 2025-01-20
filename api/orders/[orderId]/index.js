@@ -1,5 +1,6 @@
 import { getOrder, deleteOrder } from '../../../controllers/orders.js';
 import { corsMiddleware } from '../../../middleware/corsMiddleware.js';
+import { userAuth } from '../../../middleware/userAuth.js';
 import { connectDB } from '../../../lib/db.js';
 
 export default async function handler(req, res) {
@@ -19,6 +20,14 @@ export default async function handler(req, res) {
     console.error('Database connection failed:', dbError);
     return res.status(500).json({ error: 'Failed to connect to the database' });
   }
+
+  // Verify user auth
+  const authResult = await userAuth(req, res);
+  if (authResult?.error) {
+    console.error('User authentication failed:', authResult.error);
+    return res.status(401).json({ error: authResult.error });
+  }
+  console.log('User authentication successful');
 
   const { orderId } = req.query;
 

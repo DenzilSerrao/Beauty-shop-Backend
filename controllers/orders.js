@@ -2,18 +2,25 @@ import { connectDB } from '../lib/db.js'; // Import the connectDB function
 import { Order } from '../models/order.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { NotFoundError, ValidationError } from '../utils/errors.js';
+import { generateInvoice } from '../utils/invoice.js';
 import mongoose from 'mongoose';
 
-export const getOrders = asyncHandler(async (req, res) => {
+export const getOrders = asyncHandler(async (userId, req, res) => {
   // Ensure database connection is established before proceeding
   await connectDB();
-  console.log(req.user)
+
   try {
-    const orders = await Order.findByUser(req.user.id);
-    res.json({
+    // Validate userId
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      throw new ValidationError('Invalid user ID');
+    }
+
+    const orders = await Order.findByUser(userId);
+    console.log('Orders fetched:', orders);
+    return {
       status: 'success',
       data: { orders }
-    });
+    };
   } catch (error) {
     console.error('Error fetching user orders:', error);
     throw new Error('Failed to fetch user orders');
@@ -85,8 +92,7 @@ export const deleteOrder = asyncHandler(async (req, res) => {
 
 export const s_createOrder = async (orderData) => {
   const { userId, items, total, shippingAddress, customerEmail, customerPhone } = orderData;
-  // Ensure database connection is established before proceeding
-  await connectDB();
+
   // Validate input
   if (!items || !total || !shippingAddress || !customerPhone) {
     throw new ValidationError('Invalid order data');
