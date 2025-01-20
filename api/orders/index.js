@@ -1,6 +1,6 @@
 import { getOrders, s_createOrder } from '../../controllers/orders.js';
 import { corsMiddleware } from '../../middleware/corsMiddleware.js';
-import userAuth from '../../middleware/userAuth.js';
+import userAuth from '../../middleware/userAuth.js'; // Default import
 import { connectDB } from '../../lib/db.js';
 
 export default async function handler(req, res) {
@@ -32,9 +32,9 @@ export default async function handler(req, res) {
   if (req.method === 'GET') {
     try {
       console.log('Handling GET request for orders');
-      const orders = await getOrders(req.user.id, req, res);
-      console.log('Orders fetched successfully:', orders);
-      res.status(200).json(orders);
+      const ordersResponse = await getOrders(req.user.id, req, res);
+      console.log('Orders response:', ordersResponse);
+      res.status(200).json(ordersResponse);
     } catch (error) {
       console.error('Error fetching user orders:', error);
       res.status(500).json({ error: error.message });

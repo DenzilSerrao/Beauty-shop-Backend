@@ -16,6 +16,7 @@ export default async function userAuth(req, res) {
 
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      console.log('decoded token:', decoded)
       const user = await User.findById(decoded.userId);
 
       if (!user) {
