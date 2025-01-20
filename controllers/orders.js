@@ -5,15 +5,11 @@ import { NotFoundError, ValidationError } from '../utils/errors.js';
 import { generateInvoice } from '../utils/invoice.js';
 import mongoose from 'mongoose';
 
-export const getOrders = asyncHandler(async (req, res) => {
-  // console.log('Request object:', req);
-  console.log('Response object:', res);
+export const getOrders = asyncHandler(async (userId, req, res) => {
   // Ensure database connection is established before proceeding
   await connectDB();
 
   try {
-    const userId = req.user.id;
-
     // Validate userId
     if (!mongoose.Types.ObjectId.isValid(userId)) {
       throw new ValidationError('Invalid user ID');
@@ -33,10 +29,10 @@ export const getOrders = asyncHandler(async (req, res) => {
 
     console.log('Orders fetched successfully:', orders);
 
-    return res.status(200).json({
+    return {
       status: 'success',
       data: { orders }
-    });
+    };
   } catch (error) {
     console.error('Error fetching user orders:', error);
     throw new Error('Failed to fetch user orders');
@@ -66,7 +62,7 @@ export const getOrder = asyncHandler(async (req, res) => {
       throw new NotFoundError('Forbidden: User does not own this order');
     }
 
-    return res.status(200).json({
+    res.status(200).json({
       status: 'success',
       data: { order }
     });
@@ -99,7 +95,7 @@ export const deleteOrder = asyncHandler(async (req, res) => {
       throw new NotFoundError('Forbidden: User does not own this order');
     }
 
-    return res.status(204).end();
+    res.status(204).end();
   } catch (error) {
     console.error('Error deleting order:', error);
     throw new Error('Failed to delete order');
