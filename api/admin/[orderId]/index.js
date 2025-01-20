@@ -1,6 +1,6 @@
-import { AdmingetOrder, AdmindeleteOrder } from '../../../../controllers/adminController.js'; // Ensure the path is correct
-import { corsMiddleware } from '../../../../middleware/corsMiddleware.js';
-import { isAdminAuth } from '../../../../middleware/isAdminAuth.js';
+import { AdmingetOrder, AdmindeleteOrder, updateOrderStatus } from '../../../controllers/adminController.js'; // Ensure the path is correct
+import { corsMiddleware } from '../../../middleware/corsMiddleware.js';
+import { isAdminAuth } from '../../..//middleware/isAdminAuth.js';
 
 export default async function handler(req, res) {
   // Apply CORS middleware
@@ -22,6 +22,10 @@ export default async function handler(req, res) {
 
       case 'DELETE':
         await AdmindeleteOrder(req, res);
+        break;
+
+      case 'PATCH':
+        await updateOrderStatus(req, res);
         break;
 
       default:
