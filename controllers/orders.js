@@ -5,11 +5,13 @@ import { NotFoundError, ValidationError } from '../utils/errors.js';
 import { generateInvoice } from '../utils/invoice.js';
 import mongoose from 'mongoose';
 
-export const getOrders = asyncHandler(async (userId, req, res) => {
+export const getOrders = asyncHandler(async (req, res) => {
   // Ensure database connection is established before proceeding
   await connectDB();
 
   try {
+    const userId = req.user.id;
+
     // Validate userId
     if (!mongoose.Types.ObjectId.isValid(userId)) {
       throw new ValidationError('Invalid user ID');
@@ -18,7 +20,7 @@ export const getOrders = asyncHandler(async (userId, req, res) => {
     console.log('Fetching orders from:', userId);
 
     // Execute the query
-    const orders = await Order.findByUser(userId);
+    const orders = await Order.findByUser(userId).exec();
 
     console.log('Orders query executed:', orders);
 
@@ -29,17 +31,15 @@ export const getOrders = asyncHandler(async (userId, req, res) => {
 
     console.log('Orders fetched successfully:', orders);
 
-    return {
+    return res.status(200).json({
       status: 'success',
       data: { orders }
-    };
+    });
   } catch (error) {
     console.error('Error fetching user orders:', error);
     throw new Error('Failed to fetch user orders');
   }
 });
-
-// Other functions remain unchanged
 
 export const getOrder = asyncHandler(async (req, res) => {
   // Ensure database connection is established before proceeding
@@ -64,7 +64,7 @@ export const getOrder = asyncHandler(async (req, res) => {
       throw new NotFoundError('Forbidden: User does not own this order');
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       status: 'success',
       data: { order }
     });
@@ -97,7 +97,7 @@ export const deleteOrder = asyncHandler(async (req, res) => {
       throw new NotFoundError('Forbidden: User does not own this order');
     }
 
-    res.status(204).end();
+    return res.status(204).end();
   } catch (error) {
     console.error('Error deleting order:', error);
     throw new Error('Failed to delete order');
