@@ -6,6 +6,8 @@ import { generateInvoice } from '../utils/invoice.js';
 import mongoose from 'mongoose';
 
 export const getOrders = asyncHandler(async (req, res) => {
+  // console.log('Request object:', req);
+  console.log('Response object:', res);
   // Ensure database connection is established before proceeding
   await connectDB();
 
