@@ -5,11 +5,14 @@ import { NotFoundError, ValidationError } from '../utils/errors.js';
 import { generateInvoice } from '../utils/invoice.js';
 import mongoose from 'mongoose';
 
-export const getOrders = asyncHandler(async (userId, req, res) => {
+export const getOrders = asyncHandler(async (req, res) => {
   // Ensure database connection is established before proceeding
   await connectDB();
 
   try {
+    console.log('req:', req.user);
+    const userId = req.user.id; // Adjust based on your auth setup
+
     // Validate userId
     if (!mongoose.Types.ObjectId.isValid(userId)) {
       throw new ValidationError('Invalid user ID');
@@ -19,6 +22,7 @@ export const getOrders = asyncHandler(async (userId, req, res) => {
 
     // Execute the query
     const orders = await Order.findByUser(userId).exec();
+
     console.log('Orders query executed:', orders);
 
     if (!orders || orders.length === 0) {
@@ -28,13 +32,13 @@ export const getOrders = asyncHandler(async (userId, req, res) => {
 
     console.log('Orders fetched successfully:', orders);
 
-    return {
+    return res.status(200).json({
       status: 'success',
-      data: { orders }
-    };
+      data: { orders },
+    });
   } catch (error) {
     console.error('Error fetching user orders:', error);
-    throw new Error('Failed to fetch user orders');
+    throw error; // Rethrow the error to be caught by asyncHandler
   }
 });
 

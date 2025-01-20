@@ -32,9 +32,7 @@ export default async function handler(req, res) {
   if (req.method === 'GET') {
     try {
       console.log('Handling GET request for orders');
-      const ordersResponse = await getOrders(req.user.id, req, res);
-      console.log('Orders response:', ordersResponse);
-      res.status(200).json(ordersResponse);
+      return getOrders(req, res); // Directly call getOrders with req and res
     } catch (error) {
       console.error('Error fetching user orders:', error);
       res.status(500).json({ error: error.message });
