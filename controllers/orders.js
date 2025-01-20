@@ -10,6 +10,7 @@ export const getOrders = asyncHandler(async (req, res) => {
 
   try {
     const orders = await Order.findByUser(req.user.id);
+    console.log('orders retrieved:',orders)
     res.json({
       status: 'success',
       data: { orders }
@@ -42,7 +43,7 @@ export const getOrder = asyncHandler(async (req, res) => {
     if (order.userId.toString() !== req.user.id) {
       throw new NotFoundError('Forbidden: User does not own this order');
     }
-
+    console.log('order retrieved:',order)
     res.status(200).json({
       status: 'success',
       data: { order }
@@ -66,7 +67,7 @@ export const deleteOrder = asyncHandler(async (req, res) => {
     }
 
     const order = await Order.findByIdAndDelete(orderId);
-
+    console.log('order deleted:',order)
     if (!order) {
       return res.status(404).json({ error: 'Order not found' });
     }
@@ -112,7 +113,7 @@ export const s_createOrder = async (orderData) => {
       customerEmail,
       customerPhone
     });
-
+    console.log('order created:',order)
     return {
       status: 'success',
       data: { order }
@@ -143,7 +144,7 @@ export const generateOrderInvoice = asyncHandler(async (req, res) => {
     if (!order) {
       throw new NotFoundError('Order not found');
     }
-
+    console.log('order for invoice generation:',order)
     const user = await User.findById(userId);
     if (!user) {
       throw new NotFoundError('User not found');
