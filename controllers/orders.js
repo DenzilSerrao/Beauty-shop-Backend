@@ -5,12 +5,6 @@ import { NotFoundError, ValidationError } from '../utils/errors.js';
 import { generateInvoice } from '../utils/invoice.js';
 import mongoose from 'mongoose';
 
-import { connectDB } from '../lib/db.js'; // Import the connectDB function
-import { Order } from '../models/order.js';
-import { asyncHandler } from '../utils/asyncHandler.js';
-import { NotFoundError, ValidationError } from '../utils/errors.js';
-import mongoose from 'mongoose';
-
 export const getOrders = asyncHandler(async (userId, req, res) => {
   // Ensure database connection is established before proceeding
   await connectDB();
