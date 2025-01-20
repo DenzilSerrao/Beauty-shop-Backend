@@ -1,6 +1,6 @@
 import { AdmingetOrder, AdmindeleteOrder, updateOrderStatus } from '../../../controllers/adminController.js'; // Ensure the path is correct
 import { corsMiddleware } from '../../../middleware/corsMiddleware.js';
-import { isAdminAuth } from '../../..//middleware/isAdminAuth.js';
+import isAdminAuth from '../../..//middleware/isAdminAuth.js';
 
 export default async function handler(req, res) {
   // Apply CORS middleware
