@@ -10,6 +10,7 @@ export default async function handler(req, res) {
   if (req.method === 'GET') {
     try {
       const orders = await getOrders(req, res);
+      console.log('orders:', orders)
       res.status(200).json(orders);
     } catch (error) {
       res.status(500).json({ error: error.message });
