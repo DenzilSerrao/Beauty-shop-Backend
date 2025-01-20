@@ -25,7 +25,7 @@ export const register = asyncHandler(async (req, res) => {
   const user = await User.create({ name, email, password });
 
   // Generate JWT token with an expiration time of 1 hour for added security
-  const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+  const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '10h' });
 
   // Send response
   res.status(201).json({
