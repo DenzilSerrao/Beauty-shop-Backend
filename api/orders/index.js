@@ -3,6 +3,11 @@
 import { getOrders, s_createOrder } from '../../controllers/orders.js';
 
 export default async function handler(req, res) {
+  // Apply CORS middleware
+  if (corsMiddleware(req, res)) {
+    return; // Exit if the CORS middleware has handled the request
+  }
+
   if (req.method === 'GET') {
     try {
       const orders = await getOrders(req, res);
