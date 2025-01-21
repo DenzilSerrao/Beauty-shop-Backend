@@ -1,6 +1,6 @@
 import { getOrder, deleteOrder } from '../../../controllers/orders.js';
 import { corsMiddleware } from '../../../middleware/corsMiddleware.js';
-import { userAuth } from '../../../middleware/userAuth.js';
+import userAuth from '../../../middleware/userAuth.js';
 import { connectDB } from '../../../lib/db.js';
 
 export default async function handler(req, res) {
@@ -29,7 +29,7 @@ export default async function handler(req, res) {
   }
   console.log('User authentication successful');
 
-  const { orderId } = req.query;
+  const { orderId } = req.query; // Access the orderId from req.query
 
   try {
     switch (req.method) {

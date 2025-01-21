@@ -6,10 +6,9 @@
       "use": "@vercel/node"
     }
   ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "/api/$1"
-    }
+  "rewrites": [
+    { "source": "/api/orders/:orderId", "destination": "/api/orders/[orderId]" },
+    { "source": "/api/orders/:orderId/invoice", "destination": "/api/orders/[orderId]/invoice" },
+    { "source": "/api/admin/:orderId", "destination": "/api/admin/[orderId]" }
   ]
 }
