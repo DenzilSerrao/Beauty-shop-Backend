@@ -85,7 +85,6 @@ export const generateInvoice = (order, user) => {
       `₹${((item.salePrice || 0) * (item.quantity || 0)).toFixed(2)}`,
     ];
     addTableRow(doc, rowY, cols, headerWidths, ['left', 'right', 'right', 'right', 'right']);
-    doc.moveDown();
   });
 
   // Totals
