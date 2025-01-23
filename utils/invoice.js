@@ -55,12 +55,16 @@ export const generateInvoice = (order, user) => {
   // Invoice Amount with DejaVuSerif for rupee symbol
   const invoiceAmountText = `Invoice Amount: ₹${(order.total || 0).toFixed(2)} (INR)`;
   const invoiceAmountParts = invoiceAmountText.split('₹');
-  const invoiceAmountPart1 = invoiceAmountParts[0];
-  const invoiceAmountPart2 = `₹${invoiceAmountParts[1]}`;
+  const invoiceAmountPart1 = invoiceAmountParts[0]; // "Invoice Amount: "
+  const invoiceAmountPart2 = '₹'; // Rupee symbol
+  const invoiceAmountPart3 = invoiceAmountParts[1]; // "(order.total || 0).toFixed(2) (INR)"
 
   const part1Width = doc.widthOfString(invoiceAmountPart1, { font: 'Helvetica', size: 12 });
+  const part2Width = doc.widthOfString(invoiceAmountPart2, { font: 'DejaVuSerif', size: 12 });
+
   doc.font('Helvetica').fontSize(12).text(invoiceAmountPart1, 40, doc.y);
   doc.font('DejaVuSerif').fontSize(12).text(invoiceAmountPart2, 40 + part1Width, doc.y);
+  doc.font('Helvetica').fontSize(12).text(invoiceAmountPart3, 40 + part1Width + part2Width, doc.y);
   doc.moveDown();
 
   // PAID Status
@@ -81,7 +85,7 @@ export const generateInvoice = (order, user) => {
   const headerWidths = [180, 60, 80, 90, 110];
   const headerY = doc.y;
   addTableRow(doc, headerY, headers, headerWidths, ['left', 'right', 'right', 'right', 'right']);
-  doc.moveTo(40, headerY + 15).lineTo(550, headerY + 15).stroke(); // Adjusted line position for reduced left margin
+  doc.moveTo(40, headerY + 15).lineTo(570, headerY + 15).stroke(); // Adjusted line position for reduced left margin
 
   // Table Rows
   order.items.forEach((item) => {
@@ -100,13 +104,17 @@ export const generateInvoice = (order, user) => {
   // Totals
   doc.moveDown(2);
   doc.font('Helvetica-Bold').fontSize(14);
-  const totalText = `Total incl. GST: ₹${(order.total || 0).toFixed(2)}`;
-  const totalWidth = doc.widthOfString(totalText, { font: 'Helvetica-Bold', size: 14 });
-  const totalX = 295 - (totalWidth / 2); // Center the total text
-  doc.text(totalText, totalX, doc.y, { align: 'center' });
+  const totalText = `Total incl. GST: `;
+  const totalAmountText = `₹${(order.total || 0).toFixed(2)}`;
+  const totalTextWidth = doc.widthOfString(totalText, { font: 'Helvetica-Bold', size: 14 });
+  const totalAmountTextWidth = doc.widthOfString(totalAmountText, { font: 'DejaVuSerif', size: 14 });
+  const totalX = 520 - totalAmountTextWidth; // Right-align the total amount text
+  doc.text(totalText, 40, doc.y); // Left-align the text before the amount
+  doc.font('DejaVuSerif').fontSize(12).text(totalAmountText, totalX, doc.y); // Right-align the rupee symbol and amount
   doc.moveDown();
 
   // Footer
+  doc.moveDown(2);
   doc.font('Helvetica').fontSize(12).text('Thank you for shopping with ANA Beauty!', { align: 'center' });
 
   return doc;
