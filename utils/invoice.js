@@ -1,52 +1,83 @@
 // filepath: /c:/Users/win10/Desktop/mern/project-bolt-sb1-8tfedy (18)/project/server/src/utils/invoice.js
 import PDFDocument from 'pdfkit';
+import fs from 'fs';
+import path from 'path';
 
 export const generateInvoice = (order, user) => {
   console.log('Generating invoice for order:', order, 'user:', user);
   const doc = new PDFDocument();
 
+  // Pipe the PDF into a writable stream
+  const filePath = path.join(__dirname, `invoice-${order._id}.pdf`);
+  const writeStream = fs.createWriteStream(filePath);
+  doc.pipe(writeStream);
+
+  // Helper function to add a table row
+  const addTableRow = (doc, y, cols, width) => {
+    const colWidth = width / cols.length;
+    cols.forEach((col, index) => {
+      doc.text(col, index * colWidth + 50, y, { width: colWidth - 10, align: 'left' });
+    });
+  };
+
   // Header
-  doc.fontSize(20).text('ANA Beauty', { align: 'center' });
+  doc.fontSize(24).text('ANA Beauty', { align: 'center' });
   doc.moveDown();
-  doc.fontSize(16).text('Invoice', { align: 'center' });
+  doc.fontSize(18).text('Invoice', { align: 'center' });
+  doc.moveDown(2);
+
+  // Invoice Details
+  doc.fontSize(14).text(`Invoice #${order._id}`, { align: 'left' });
+  doc.text(`Date: ${new Date(order.createdAt).toLocaleDateString()}`, { align: 'left' });
   doc.moveDown();
 
   // User Details
+  doc.fontSize(14).text('Bill To:', { underline: true });
+  doc.moveDown();
   doc.fontSize(12);
   doc.text(`Name: ${user.name}`);
   doc.text(`Email: ${user.email}`);
-  doc.moveDown();
+  doc.text(`Phone: ${order.customerPhone}`);
+  doc.text(`Shipping Address: ${order.shippingAddress}`);
+  doc.moveDown(2);
 
   // Order Details
-  doc.text(`Order ID: ${order._id}`);
-  doc.text(`Date: ${new Date(order.createdAt).toLocaleDateString()}`);
-  doc.text(`Status: ${order.status}`);
+  doc.fontSize(14).text('Order Details:', { underline: true });
   doc.moveDown();
 
-  // Shipping Address
-  doc.text('Shipping Address:');
-  doc.text(order.shippingAddress);
+  // Table Headers
+  const headers = ['Item Name', 'Quantity', 'Unit Price', 'Total'];
+  const headerY = doc.y;
+  addTableRow(doc, headerY, headers, 500);
   doc.moveDown();
 
-  // Items Table
-  doc.text('Items:', { underline: true });
-  doc.moveDown();
+  // Draw horizontal line for headers
+  doc.moveTo(50, headerY + 20).lineTo(550, headerY + 20).stroke();
 
-  order.items.forEach(item => {
-    doc.text(`${item.name}`);
-    doc.text(`Quantity: ${item.quantity} x $${item.price} = $${item.quantity * item.price}`, {
-      indent: 20
-    });
+  // Table Rows
+  order.items.forEach((item, index) => {
+    const rowY = doc.y;
+    const cols = [
+      item.name,
+      item.quantity.toString(),
+      `$${item.price.toFixed(2)}`,
+      `$${(item.quantity * item.price).toFixed(2)}`
+    ];
+    addTableRow(doc, rowY, cols, 500);
     doc.moveDown();
   });
 
   // Total
   doc.moveDown();
-  doc.fontSize(14).text(`Total Amount: $${order.total}`, { align: 'right' });
+  doc.fontSize(14).text(`Total Amount: $${order.total.toFixed(2)}`, { align: 'right' });
 
   // Footer
   doc.moveDown(2);
-  doc.fontSize(10).text('Thank you for shopping with ANA Beauty!', { align: 'center' });
+  doc.fontSize(12).text('Thank you for shopping with ANA Beauty!', { align: 'center' });
 
-  return doc;
+  // Finalize the PDF and end the stream
+  doc.end();
+
+  // Return the file path
+  return filePath;
 };
