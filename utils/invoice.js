@@ -63,7 +63,7 @@ export const generateInvoice = (order, user) => {
   const part2Width = doc.widthOfString(invoiceAmountPart2, { font: 'DejaVuSerif', size: 12 });
   const part3Width = doc.widthOfString(invoiceAmountPart3, { font: 'Helvetica', size: 12 });
 
-  const invoiceAmountX = 40; // Start position for the invoice amount text
+  const invoiceAmountX = 50; // Start position for the invoice amount text
   doc.font('Helvetica').fontSize(12).text(invoiceAmountPart1, invoiceAmountX, doc.y);
   doc.font('DejaVuSerif').fontSize(12).text(invoiceAmountPart2, invoiceAmountX + part1Width, doc.y);
   doc.font('Helvetica').fontSize(12).text(invoiceAmountPart3, invoiceAmountX + part1Width + part2Width, doc.y);
@@ -110,7 +110,7 @@ export const generateInvoice = (order, user) => {
   const totalAmountText = `₹${(order.total || 0).toFixed(2)}`;
   const totalTextWidth = doc.widthOfString(totalText, { font: 'Helvetica-Bold', size: 14 });
   const totalAmountTextWidth = doc.widthOfString(totalAmountText, { font: 'DejaVuSerif', size: 14 });
-  const totalX = 40 + totalTextWidth; // Calculate position for total amount text
+  const totalX = 50 + totalTextWidth; // Calculate position for total amount text
   doc.text(totalText, 40, doc.y); // Left-align the text before the amount
   doc.font('DejaVuSerif').fontSize(14).text(totalAmountText, totalX, doc.y); // Right-align the rupee symbol and amount on the same line
   doc.moveDown();
@@ -118,5 +118,5 @@ export const generateInvoice = (order, user) => {
   // Footer
   doc.moveDown(2);
   doc.font('Helvetica').fontSize(12).text('Thank you for shopping with ANA Beauty!', { align: 'center' });
-  return doc;
+    return doc;
 };
