@@ -103,21 +103,23 @@ export const generateInvoice = (order, user) => {
     doc.moveDown();
   });
 
-  // Totals
+    // Totals
   doc.moveDown(2);
   doc.font('Helvetica-Bold').fontSize(14);
   const totalText = `Total incl. GST: `;
   const totalAmountText = `₹${(order.total || 0).toFixed(2)}`;
 
-  // Combine the texts into one string with appropriate spacing
-  const combinedText = `${totalText}${totalAmountText}`;
+  // Measure the width of the totalText
   const totalTextWidth = doc.widthOfString(totalText, { font: 'Helvetica-Bold', size: 14 });
 
-  // Use a single text call with formatted text
-  doc.text([
-    { text: totalText, features: { font: 'Helvetica-Bold', size: 14 } },
-    { text: totalAmountText, features: { font: 'DejaVuSerif', size: 14 } }
-  ], 40, doc.y);
+  // Set the position for the totalAmountText
+  const totalX = 70 + totalTextWidth;
+
+  // Draw the totalText
+  doc.text(totalText, 40, doc.y);
+
+  // Draw the totalAmountText at the calculated position
+  doc.font('DejaVuSerif').fontSize(14).text(totalAmountText, totalX, doc.y);
 
   doc.moveDown();
 
