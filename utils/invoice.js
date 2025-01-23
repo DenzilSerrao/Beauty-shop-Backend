@@ -13,9 +13,9 @@ export const generateInvoice = (order, user) => {
 
   // Load and register the DejaVuSerif and DejaVuSerif-Bold fonts for the rupee symbol
   const fontPathDejaVuSerif = path.join(__dirname, 'DejaVuSerif.ttf'); // Ensure the font file is in the same directory
-  const fontPathDejaVuSerifBold = path.join(__dirname, 'DejaVuSerif-Bold.ttf'); // Ensure the font file is in the same directory
+  // const fontPathDejaVuSerifBold = path.join(__dirname, 'DejaVuSerif-Bold.ttf'); // Ensure the font file is in the same directory
   doc.registerFont('DejaVuSerif', fontPathDejaVuSerif);
-  doc.registerFont('DejaVuSerif-Bold', fontPathDejaVuSerifBold);
+  // doc.registerFont('DejaVuSerif-Bold', fontPathDejaVuSerifBold);
 
   // Helper function to add a table row
   const addTableRow = (doc, y, cols, widths, alignments = []) => {
@@ -28,7 +28,7 @@ export const generateInvoice = (order, user) => {
 
       // Check if the column contains the rupee symbol and switch fonts accordingly
       if (col.includes('₹')) {
-        doc.font('DejaVuSerif-Bold').fontSize(12).text(col, x, y, textOptions);
+        doc.font('DejaVuSerif').fontSize(12).text(col, x, y, textOptions);
       } else {
         doc.font('Helvetica').fontSize(12).text(col, x, y, textOptions);
       }
@@ -105,10 +105,10 @@ export const generateInvoice = (order, user) => {
   const totalText = `Total incl. GST: `;
   const totalAmountText = `₹${(order.total || 0).toFixed(2)}`;
   const totalTextWidth = doc.widthOfString(totalText, { font: 'Helvetica-Bold', size: 14 });
-  const totalAmountTextWidth = doc.widthOfString(totalAmountText, { font: 'DejaVuSerif-Bold', size: 14 });
+  const totalAmountTextWidth = doc.widthOfString(totalAmountText, { font: 'DejaVuSerif', size: 14 });
   const totalX = 520 - totalAmountTextWidth - 40; // Align the amount to the right margin with reduced left margin
   doc.text(totalText, 520 - totalTextWidth - totalAmountTextWidth - 40, doc.y); // Position the text before the amount
-  doc.font('DejaVuSerif-Bold').fontSize(14).text(totalAmountText, totalX, doc.y);
+  doc.font('DejaVuSerif').fontSize(14).text(totalAmountText, totalX, doc.y);
 
   // Footer
   doc.moveDown(2);
