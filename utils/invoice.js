@@ -9,7 +9,7 @@ const __dirname = path.dirname(__filename);
 
 export const generateInvoice = (order, user) => {
   console.log('Generating invoice for order:', order, 'user:', user);
-  const doc = new PDFDocument({ size: 'A4', margin: 50 });
+  const doc = new PDFDocument({ size: 'A4', margin: { top: 50, left: 40, right: 40, bottom: 50 } }); // Reduced left margin
 
   // Load and register the DejaVuSerif and DejaVuSerif-Bold fonts for the rupee symbol
   const fontPathDejaVuSerif = path.join(__dirname, 'DejaVuSerif.ttf'); // Ensure the font file is in the same directory
@@ -20,7 +20,7 @@ export const generateInvoice = (order, user) => {
   // Helper function to add a table row
   const addTableRow = (doc, y, cols, widths, alignments = []) => {
     cols.forEach((col, index) => {
-      const x = 50 + widths.slice(0, index).reduce((a, b) => a + b, 0);
+      const x = 40 + widths.slice(0, index).reduce((a, b) => a + b, 0); // Adjusted x position for reduced left margin
       const textOptions = {
         width: widths[index],
         align: alignments[index] || 'left',
@@ -28,11 +28,19 @@ export const generateInvoice = (order, user) => {
 
       // Check if the column contains the rupee symbol and switch fonts accordingly
       if (col.includes('₹')) {
-        doc.font('DejaVuSerif').fontSize(12).text(col, x, y, textOptions);
+        doc.font('DejaVuSerif-Bold').fontSize(12).text(col, x, y, textOptions);
       } else {
         doc.font('Helvetica').fontSize(12).text(col, x, y, textOptions);
       }
     });
+  };
+
+  // Helper function to format date as DD/MM/YYYY
+  const formatDate = (date) => {
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
   };
 
   // Header
@@ -44,9 +52,17 @@ export const generateInvoice = (order, user) => {
 
   // Invoice Details
   doc.font('Helvetica-Bold').fontSize(14).text(`Invoice #: ${order._id}`);
-  doc.font('Helvetica').fontSize(12).text(`Invoice Issued: ${new Date(order.createdAt).toLocaleDateString()}`);
-  doc.text(`Invoice Amount: ₹${(order.total || 0).toFixed(2)} (INR)`);
-  // doc.text(`Next Billing Date: ${order.nextBillingDate || 'N/A'}`);
+  doc.font('Helvetica').fontSize(12).text(`Invoice Issued: ${formatDate(new Date(order.createdAt))}`);
+
+  // Invoice Amount with DejaVuSerif-Bold for rupee symbol
+  const invoiceAmountText = `Invoice Amount: ₹${(order.total || 0).toFixed(2)} (INR)`;
+  const invoiceAmountParts = invoiceAmountText.split('₹');
+  const invoiceAmountPart1 = invoiceAmountParts[0];
+  const invoiceAmountPart2 = `₹${invoiceAmountParts[1]}`;
+
+  const part1Width = doc.widthOfString(invoiceAmountPart1, { font: 'Helvetica', size: 12 });
+  doc.font('Helvetica').fontSize(12).text(invoiceAmountPart1, 40, doc.y);
+  doc.font('DejaVuSerif').fontSize(12).text(invoiceAmountPart2, 40 + part1Width, doc.y);
   doc.moveDown();
 
   // PAID Status
@@ -67,7 +83,7 @@ export const generateInvoice = (order, user) => {
   const headerWidths = [180, 60, 80, 90, 110];
   const headerY = doc.y;
   addTableRow(doc, headerY, headers, headerWidths, ['left', 'right', 'right', 'right', 'right']);
-  doc.moveTo(50, headerY + 15).lineTo(550, headerY + 15).stroke();
+  doc.moveTo(40, headerY + 15).lineTo(520, headerY + 15).stroke(); // Adjusted line position for reduced left margin
 
   // Table Rows
   order.items.forEach((item) => {
@@ -90,9 +106,9 @@ export const generateInvoice = (order, user) => {
   const totalAmountText = `₹${(order.total || 0).toFixed(2)}`;
   const totalTextWidth = doc.widthOfString(totalText, { font: 'Helvetica-Bold', size: 14 });
   const totalAmountTextWidth = doc.widthOfString(totalAmountText, { font: 'DejaVuSerif-Bold', size: 14 });
-  const totalX = 550 - totalAmountTextWidth - 50; // Align the amount to the right margin
-  doc.text(totalText, 550 - totalTextWidth - totalAmountTextWidth - 50, doc.y); // Position the text before the amount
-  doc.font('DejaVuSerif').fontSize(14).text(totalAmountText, totalX, doc.y);
+  const totalX = 520 - totalAmountTextWidth - 40; // Align the amount to the right margin with reduced left margin
+  doc.text(totalText, 520 - totalTextWidth - totalAmountTextWidth - 40, doc.y); // Position the text before the amount
+  doc.font('DejaVuSerif-Bold').fontSize(14).text(totalAmountText, totalX, doc.y);
 
   // Footer
   doc.moveDown(2);
