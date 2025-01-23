@@ -42,13 +42,12 @@ export const getOrders = asyncHandler(async (req, res) => {
   }
 });
 
-export const getOrder = asyncHandler(async (req, res) => {
+export const getOrder = asyncHandler(async (orderId, req, res) => {
   // Ensure database connection is established before proceeding
   await connectDB();
 
   try {
-    const { orderId } = req.query;
-
+    console.log('Fetching order:', orderId);
     // Validate orderId
     if (!mongoose.Types.ObjectId.isValid(orderId)) {
       throw new ValidationError('Invalid order ID');
@@ -75,14 +74,12 @@ export const getOrder = asyncHandler(async (req, res) => {
   }
 });
 
-export const deleteOrder = asyncHandler(async (req, res) => {
+export const deleteOrder = asyncHandler(async (orderId, res) => {
   // Ensure database connection is established before proceeding
   await connectDB();
 
   try {
-    console.log('Deleting order:', req.query);
-    console.log('Deleting order:', req.params);
-    const { orderId } = req.query;
+    console.log('Deleting order:', orderId);
     const order = await Order.findByIdAndDelete(orderId);
 
     if (!order) {
