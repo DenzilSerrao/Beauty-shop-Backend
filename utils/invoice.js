@@ -5,70 +5,69 @@ export const generateInvoice = (order, user) => {
   const doc = new PDFDocument({ size: 'A4', margin: 50 });
 
   // Helper function to add a table row
-  const addTableRow = (doc, y, cols, widths, styles = {}) => {
+  const addTableRow = (doc, y, cols, widths, alignments = []) => {
     cols.forEach((col, index) => {
-      const style = styles[index] || {};
-      doc.text(col, 50 + widths.slice(0, index).reduce((a, b) => a + b, 0), y, style);
+      const x = 50 + widths.slice(0, index).reduce((a, b) => a + b, 0);
+      doc.text(col, x, y, {
+        width: widths[index],
+        align: alignments[index] || 'left',
+      });
     });
   };
 
   // Header
-  doc.font('Helvetica-Bold').fontSize(24).text('ANA Beauty', { align: 'center' });
-  doc.moveDown();
-  doc.font('Helvetica-Bold').fontSize(18).text('Invoice', { align: 'center' });
+  doc.font('Helvetica-Bold').fontSize(20).text('VENTURE FUTURE', { align: 'center' });
+  doc.font('Helvetica').fontSize(10).text('No 619/2801/1182, Mattiga Complex, Police Station Road', { align: 'center' });
+  doc.text('Kasaba Hobali, Tirthahalli, Shivamogga, Karnataka - 577432', { align: 'center' });
+  doc.text('GST Reg #: 29HTXPS1735K1ZJ', { align: 'center' });
   doc.moveDown(2);
 
   // Invoice Details
-  doc.font('Helvetica-Bold').fontSize(14).text(`Invoice #${order._id}`, { align: 'left' });
-  doc.font('Helvetica').fontSize(12).text(`Date: ${new Date(order.createdAt).toLocaleDateString()}`, { align: 'left' });
+  doc.font('Helvetica-Bold').fontSize(14).text(`Invoice #: ${order._id}`);
+  doc.font('Helvetica').fontSize(12).text(`Invoice Issued: ${new Date(order.createdAt).toLocaleDateString()}`);
+  doc.text(`Invoice Amount: ₹${order.total.toFixed(2)} (INR)`);
+  doc.text(`Next Billing Date: ${order.nextBillingDate || 'N/A'}`);
   doc.moveDown();
 
-  // User Details
-  doc.font('Helvetica-Bold').fontSize(14).text('Bill To:', { underline: true });
-  doc.moveDown();
+  // PAID Status
+  doc.font('Helvetica-Bold').fontSize(16).fillColor('green').text('PAID', { align: 'right' });
+  doc.fillColor('black');
+
+  // Billed To Section
+  doc.font('Helvetica-Bold').fontSize(14).text('BILLED TO:');
   doc.font('Helvetica').fontSize(12);
-  doc.text(`Name: ${user.name}`);
-  doc.text(`Email: ${user.email}`);
-  doc.text(`Phone: ${order.customerPhone}`);
-  doc.text(`Shipping Address: ${order.shippingAddress}`);
+  doc.text(user.name);
+  doc.text(order.shippingAddress);
+  doc.text(user.email);
+  doc.text(order.customerPhone);
   doc.moveDown(2);
 
-  // Order Details
-  doc.font('Helvetica-Bold').fontSize(14).text('Order Details:', { underline: true });
-  doc.moveDown();
-
   // Table Headers
-  const headers = ['Item Name', 'Quantity', 'Unit Price', 'Total'];
-  const headerWidths = [250, 80, 100, 100];
-  const headerStyles = [{ bold: true }, {}, {}, {}];
+  const headers = ['DESCRIPTION', 'PRICE', 'DISCOUNT', 'TOTAL EXCL. GST', 'GST AMOUNT (INR)'];
+  const headerWidths = [200, 60, 60, 100, 100];
   const headerY = doc.y;
-  addTableRow(doc, headerY, headers, headerWidths, headerStyles);
-  doc.moveDown();
-
-  // Draw horizontal line for headers
-  doc.moveTo(50, headerY + 20).lineTo(550, headerY + 20).stroke();
+  addTableRow(doc, headerY, headers, headerWidths, ['left', 'right', 'right', 'right', 'right']);
+  doc.moveTo(50, headerY + 15).lineTo(550, headerY + 15).stroke();
 
   // Table Rows
-  order.items.forEach((item, index) => {
-    const rowY = doc.y;
+  order.items.forEach((item) => {
+    const rowY = doc.y + 5;
     const cols = [
-      item.name,
-      item.quantity.toString(),
-      `$${item.salePrice.toFixed(2)}`,
-      `$${(item.quantity * item.salePrice).toFixed(2)}`
+      `${item.name} (${item.duration || 'N/A'})`,
+      `₹${item.price.toFixed(2)}`,
+      `₹${(item.price - item.salePrice).toFixed(2)}`,
+      `₹${item.salePrice.toFixed(2)}`,
+      `₹${item.gstAmount.toFixed(2)}`,
     ];
-    const rowStyles = [{}, {}, {}, {}];
-    addTableRow(doc, rowY, cols, headerWidths, rowStyles);
+    addTableRow(doc, rowY, cols, headerWidths, ['left', 'right', 'right', 'right', 'right']);
     doc.moveDown();
   });
 
-  // Total
-  doc.moveDown();
-  doc.font('Helvetica-Bold').fontSize(14).text(`Total Amount: $${order.total.toFixed(2)}`, { align: 'right' });
-
-  // Footer
+  // Totals
   doc.moveDown(2);
-  doc.font('Helvetica').fontSize(12).text('Thank you for shopping with ANA Beauty!', { align: 'center' });
+  doc.font('Helvetica-Bold').text(`Total excl. GST: ₹${order.totalExclGST.toFixed(2)}`, { align: 'right' });
+  doc.text(`Total incl. GST: ₹${order.total.toFixed(2)}`, { align: 'right' });
+  doc.text(`Amount Due (INR): ₹${order.amountDue.toFixed(2)}`, { align: 'right' });
 
   return doc;
 };
