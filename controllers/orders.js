@@ -80,6 +80,8 @@ export const deleteOrder = asyncHandler(async (req, res) => {
   await connectDB();
 
   try {
+    console.log('Deleting order:', req.query);
+    console.log('Deleting order:', req.params);
     const { orderId } = req.query;
     const order = await Order.findByIdAndDelete(orderId);
 
@@ -96,6 +98,7 @@ export const deleteOrder = asyncHandler(async (req, res) => {
     throw new Error('Failed to delete order');
   }
 });
+
 
 export const s_createOrder = async (orderData) => {
   const { userId, items, total, shippingAddress, customerEmail, customerPhone } = orderData;
