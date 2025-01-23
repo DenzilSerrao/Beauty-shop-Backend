@@ -67,8 +67,7 @@ export const generateInvoice = (order, user) => {
   doc.moveDown(2);
   doc.fontSize(12).text('Thank you for shopping with ANA Beauty!', { align: 'center' });
 
-  // Pipe the PDF document to the response stream
-  doc.pipe(res);
   doc.end();
+  return doc;
 };
 
