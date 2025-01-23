@@ -108,11 +108,17 @@ export const generateInvoice = (order, user) => {
   doc.font('Helvetica-Bold').fontSize(14);
   const totalText = `Total incl. GST: `;
   const totalAmountText = `₹${(order.total || 0).toFixed(2)}`;
+
+  // Combine the texts into one string with appropriate spacing
+  const combinedText = `${totalText}${totalAmountText}`;
   const totalTextWidth = doc.widthOfString(totalText, { font: 'Helvetica-Bold', size: 14 });
-  const totalAmountTextWidth = doc.widthOfString(totalAmountText, { font: 'DejaVuSerif', size: 14 });
-  const totalX = 50 + totalTextWidth; // Calculate position for total amount text
-  doc.text(totalText, 40, doc.y); // Left-align the text before the amount
-  doc.font('DejaVuSerif').fontSize(14).text(totalAmountText, totalX, doc.y); // Right-align the rupee symbol and amount on the same line
+
+  // Use a single text call with formatted text
+  doc.text([
+    { text: totalText, features: { font: 'Helvetica-Bold', size: 14 } },
+    { text: totalAmountText, features: { font: 'DejaVuSerif', size: 14 } }
+  ], 40, doc.y);
+
   doc.moveDown();
 
   // Footer
