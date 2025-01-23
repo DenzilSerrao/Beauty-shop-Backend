@@ -1,16 +1,8 @@
-// filepath: /c:/Users/win10/Desktop/mern/project-bolt-sb1-8tfedy (18)/project/server/src/utils/invoice.js
 import PDFDocument from 'pdfkit';
-import fs from 'fs';
-import path from 'path';
 
-export const generateInvoice = (order, user) => {
+export const generateInvoice = (order, user, res) => {
   console.log('Generating invoice for order:', order, 'user:', user);
   const doc = new PDFDocument();
-
-  // Pipe the PDF into a writable stream
-  const filePath = path.join(__dirname, `invoice-${order._id}.pdf`);
-  const writeStream = fs.createWriteStream(filePath);
-  doc.pipe(writeStream);
 
   // Helper function to add a table row
   const addTableRow = (doc, y, cols, width) => {
@@ -75,9 +67,7 @@ export const generateInvoice = (order, user) => {
   doc.moveDown(2);
   doc.fontSize(12).text('Thank you for shopping with ANA Beauty!', { align: 'center' });
 
-  // Finalize the PDF and end the stream
+  // Pipe the PDF document to the response stream
+  doc.pipe(res);
   doc.end();
-
-  // Return the file path
-  return filePath;
 };
