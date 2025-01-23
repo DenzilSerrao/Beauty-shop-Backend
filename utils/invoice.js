@@ -52,7 +52,7 @@ export const generateInvoice = (order, user) => {
   doc.font('Helvetica-Bold').fontSize(14).text(`Invoice #: ${order._id}`);
   doc.font('Helvetica').fontSize(12).text(`Invoice Issued: ${formatDate(new Date(order.createdAt))}`);
 
-  // Invoice Amount with DejaVuSerif for rupee symbol
+    // Invoice Amount with DejaVuSerif for rupee symbol
   const invoiceAmountText = `Invoice Amount: ₹${(order.total || 0).toFixed(2)} (INR)`;
   const invoiceAmountParts = invoiceAmountText.split('₹');
   const invoiceAmountPart1 = invoiceAmountParts[0]; // "Invoice Amount: "
@@ -61,10 +61,12 @@ export const generateInvoice = (order, user) => {
 
   const part1Width = doc.widthOfString(invoiceAmountPart1, { font: 'Helvetica', size: 12 });
   const part2Width = doc.widthOfString(invoiceAmountPart2, { font: 'DejaVuSerif', size: 12 });
+  const part3Width = doc.widthOfString(invoiceAmountPart3, { font: 'Helvetica', size: 12 });
 
-  doc.font('Helvetica').fontSize(12).text(invoiceAmountPart1, 40, doc.y);
-  doc.font('DejaVuSerif').fontSize(12).text(invoiceAmountPart2, 40 + part1Width, doc.y);
-  doc.font('Helvetica').fontSize(12).text(invoiceAmountPart3, 40 + part1Width + part2Width, doc.y);
+  const invoiceAmountX = 40; // Start position for the invoice amount text
+  doc.font('Helvetica').fontSize(12).text(invoiceAmountPart1, invoiceAmountX, doc.y);
+  doc.font('DejaVuSerif').fontSize(12).text(invoiceAmountPart2, invoiceAmountX + part1Width, doc.y);
+  doc.font('Helvetica').fontSize(12).text(invoiceAmountPart3, invoiceAmountX + part1Width + part2Width, doc.y);
   doc.moveDown();
 
   // PAID Status
@@ -108,14 +110,13 @@ export const generateInvoice = (order, user) => {
   const totalAmountText = `₹${(order.total || 0).toFixed(2)}`;
   const totalTextWidth = doc.widthOfString(totalText, { font: 'Helvetica-Bold', size: 14 });
   const totalAmountTextWidth = doc.widthOfString(totalAmountText, { font: 'DejaVuSerif', size: 14 });
-  const totalX = 520 - totalAmountTextWidth; // Right-align the total amount text
+  const totalX = 40 + totalTextWidth; // Calculate position for total amount text
   doc.text(totalText, 40, doc.y); // Left-align the text before the amount
-  doc.font('DejaVuSerif').fontSize(12).text(totalAmountText, totalX, doc.y); // Right-align the rupee symbol and amount
+  doc.font('DejaVuSerif').fontSize(14).text(totalAmountText, totalX, doc.y); // Right-align the rupee symbol and amount on the same line
   doc.moveDown();
 
   // Footer
   doc.moveDown(2);
   doc.font('Helvetica').fontSize(12).text('Thank you for shopping with ANA Beauty!', { align: 'center' });
-
   return doc;
 };
