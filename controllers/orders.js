@@ -153,6 +153,8 @@ export const generateOrderInvoice = asyncHandler(async (req, res) => {
   try {
     const { orderId } = req.params;
     const { userId } = req.query;
+    console.log('The request conatins :', req.params, 'and user:', req.query);
+    console.log('Generating invoice for order:', orderId, 'and user:', userId);
 
     // Validate orderId and userId
     if (!mongoose.Types.ObjectId.isValid(orderId)) {
