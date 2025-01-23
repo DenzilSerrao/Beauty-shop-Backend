@@ -47,7 +47,7 @@ export const getOrder = asyncHandler(async (req, res) => {
   await connectDB();
 
   try {
-    const { orderId } = req.params;
+    const { orderId } = req.query;
 
     // Validate orderId
     if (!mongoose.Types.ObjectId.isValid(orderId)) {
@@ -80,7 +80,7 @@ export const deleteOrder = asyncHandler(async (req, res) => {
   await connectDB();
 
   try {
-    const { orderId } = req.params;
+    const { orderId } = req.query;
 
     // Validate orderId
     if (!mongoose.Types.ObjectId.isValid(orderId)) {
@@ -135,7 +135,7 @@ export const s_createOrder = async (orderData) => {
       customerPhone
     });
     console.log('Order created successfully in the database:', order);
-    
+
     return {
       status: 'success',
       data: { order }

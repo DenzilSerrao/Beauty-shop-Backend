@@ -33,7 +33,7 @@ export const AdmingetOrder = asyncHandler(async (req, res) => {
   await connectDB();
 
   try {
-    const { orderId } = req.params;
+    const { orderId } = req.query;
     const order = await Order.findById(orderId).populate('userId', 'name email');
 
     if (!order) {
@@ -55,7 +55,7 @@ export const AdmindeleteOrder = asyncHandler(async (req, res) => {
   await connectDB();
 
   try {
-    const { orderId } = req.params;
+    const { orderId } = req.query;
     const order = await Order.findByIdAndDelete(orderId);
 
     if (!order) {
@@ -77,7 +77,7 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
   await connectDB();
 
   try {
-    const { orderId } = req.params;
+    const { orderId } = req.query;
     const { status } = req.body;
 
     if (!status) {
