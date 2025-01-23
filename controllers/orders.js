@@ -81,24 +81,16 @@ export const deleteOrder = asyncHandler(async (req, res) => {
 
   try {
     const { orderId } = req.query;
-
-    // Validate orderId
-    if (!mongoose.Types.ObjectId.isValid(orderId)) {
-      throw new ValidationError('Invalid order ID');
-    }
-
     const order = await Order.findByIdAndDelete(orderId);
 
     if (!order) {
-      return res.status(404).json({ error: 'Order not found' });
+      return res.status(404).json({ status: 'fail', message: 'Order not found' });
     }
 
-    // Check if the user owns the order
-    if (order.userId.toString() !== req.user.id) {
-      throw new NotFoundError('Forbidden: User does not own this order');
-    }
-
-    res.status(204).end();
+    res.json({
+      status: 'success',
+      message: 'Order deleted successfully'
+    });
   } catch (error) {
     console.error('Error deleting order:', error);
     throw new Error('Failed to delete order');
