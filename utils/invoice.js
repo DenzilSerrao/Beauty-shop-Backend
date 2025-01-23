@@ -44,7 +44,7 @@ export const generateInvoice = (order, user) => {
 
   // Table Headers
   const headers = ['DESCRIPTION', 'PRICE', 'DISCOUNT', 'QUANTITY', 'TOTAL INCL. GST'];
-  const headerWidths = [200, 60, 60, 100, 100];
+  const headerWidths = [180, 60, 80, 90, 110];
   const headerY = doc.y;
   addTableRow(doc, headerY, headers, headerWidths, ['left', 'right', 'right', 'right', 'right']);
   doc.moveTo(50, headerY + 15).lineTo(550, headerY + 15).stroke();
