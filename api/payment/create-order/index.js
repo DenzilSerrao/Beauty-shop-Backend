@@ -2,7 +2,7 @@ import { corsMiddleware } from '../../../middleware/corsMiddleware.js';
 import userAuth from '../../../middleware/userAuth.js';
 import { connectDB } from '../../../lib/db.js';
 import { s_createOrder } from '../../../controllers/orders.js';
-import razorpay from '../../../config/razorpay.js';
+import { razorpay } from '../../../config/razorpay.js';
 
 export default async function handler(req, res) {
   // Apply CORS middleware

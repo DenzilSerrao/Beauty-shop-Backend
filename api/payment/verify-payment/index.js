@@ -1,7 +1,7 @@
 import { corsMiddleware } from '../../../middleware/corsMiddleware.js';
 import userAuth from '../../../middleware/userAuth.js';
 import { connectDB } from '../../../lib/db.js';
-// import razorpay from '../../../config/razorpay.js';
+import { razorpay } from '../../../config/razorpay.js';
 import { Order } from '../../../models/order.js';
 import { Payment } from '../../../models/payment.js';
 import crypto from 'crypto';

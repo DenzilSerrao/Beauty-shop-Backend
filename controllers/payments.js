@@ -1,4 +1,4 @@
-import razorpay from '../config/razorpay.js';
+import { razorpay } from '../config/razorpay.js';
 import { Payment } from '../models/payment.js';
 import { Order } from '../models/order.js';
 import crypto from 'crypto';
