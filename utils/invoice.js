@@ -11,7 +11,7 @@ export const generateInvoice = (order, user) => {
   console.log('Generating invoice for order:', order, 'user:', user);
   const doc = new PDFDocument({ size: 'A4', margin: 50 });
 
-  // Load and register the DejaVuSans font
+  // Load and register the DejaVuSans font for the rupee symbol
   const fontPath = path.join(__dirname, 'DejaVuSans.ttf'); // Ensure the font file is in the same directory
   doc.registerFont('DejaVuSans', fontPath);
 
@@ -19,34 +19,41 @@ export const generateInvoice = (order, user) => {
   const addTableRow = (doc, y, cols, widths, alignments = []) => {
     cols.forEach((col, index) => {
       const x = 50 + widths.slice(0, index).reduce((a, b) => a + b, 0);
-      doc.font('DejaVuSans').fontSize(12).text(col, x, y, {
+      const textOptions = {
         width: widths[index],
         align: alignments[index] || 'left',
-      });
+      };
+
+      // Check if the column contains the rupee symbol and switch fonts accordingly
+      if (col.includes('₹')) {
+        doc.font('DejaVuSans').fontSize(12).text(col, x, y, textOptions);
+      } else {
+        doc.font('Helvetica').fontSize(12).text(col, x, y, textOptions);
+      }
     });
   };
 
   // Header
-  doc.font('DejaVuSans').fontSize(20).text('VENTURE FUTURE', { align: 'center' });
-  doc.font('DejaVuSans').fontSize(10).text('No 619/2801/1182, Mattiga Complex, Police Station Road', { align: 'center' });
+  doc.font('Helvetica-Bold').fontSize(20).text('VENTURE FUTURE', { align: 'center' });
+  doc.font('Helvetica').fontSize(10).text('No 619/2801/1182, Mattiga Complex, Police Station Road', { align: 'center' });
   doc.text('Kasaba Hobali, Tirthahalli, Shivamogga, Karnataka - 577432', { align: 'center' });
   doc.text('GST Reg #: 29HTXPS1735K1ZJ', { align: 'center' });
   doc.moveDown(2);
 
   // Invoice Details
-  doc.font('DejaVuSans').fontSize(14).text(`Invoice #: ${order._id}`);
-  doc.font('DejaVuSans').fontSize(12).text(`Invoice Issued: ${new Date(order.createdAt).toLocaleDateString()}`);
+  doc.font('Helvetica-Bold').fontSize(14).text(`Invoice #: ${order._id}`);
+  doc.font('Helvetica').fontSize(12).text(`Invoice Issued: ${new Date(order.createdAt).toLocaleDateString()}`);
   doc.text(`Invoice Amount: ₹${(order.total || 0).toFixed(2)} (INR)`);
   // doc.text(`Next Billing Date: ${order.nextBillingDate || 'N/A'}`);
   doc.moveDown();
 
   // PAID Status
-  doc.font('DejaVuSans').fontSize(16).fillColor('green').text('PAID', { align: 'right' });
+  doc.font('Helvetica-Bold').fontSize(16).fillColor('green').text('PAID', { align: 'right' });
   doc.fillColor('black');
 
   // Billed To Section
-  doc.font('DejaVuSans').fontSize(14).text('BILLED TO:');
-  doc.font('DejaVuSans').fontSize(12);
+  doc.font('Helvetica-Bold').fontSize(14).text('BILLED TO:');
+  doc.font('Helvetica').fontSize(12);
   doc.text(user.name);
   doc.text(order.shippingAddress);
   doc.text(user.email);
@@ -76,7 +83,7 @@ export const generateInvoice = (order, user) => {
 
   // Totals
   doc.moveDown(2);
-  doc.font('DejaVuSans').fontSize(14).text(`Total incl. GST: ₹${(order.total || 0).toFixed(2)}`, { align: 'right' });
+  doc.font('Helvetica-Bold').fontSize(14).text(`Total incl. GST: ₹${(order.total || 0).toFixed(2)}`, { align: 'right' });
 
   return doc;
 };
