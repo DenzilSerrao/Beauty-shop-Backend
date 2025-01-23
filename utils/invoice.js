@@ -43,7 +43,7 @@ export const generateInvoice = (order, user) => {
   doc.moveDown(2);
 
   // Table Headers
-  const headers = ['DESCRIPTION', 'PRICE', 'DISCOUNT', 'TOTAL INCL. GST'];
+  const headers = ['DESCRIPTION', 'PRICE', 'DISCOUNT', 'QUANTITY', 'TOTAL INCL. GST'];
   const headerWidths = [200, 60, 60, 100, 100];
   const headerY = doc.y;
   addTableRow(doc, headerY, headers, headerWidths, ['left', 'right', 'right', 'right', 'right']);
@@ -54,9 +54,10 @@ export const generateInvoice = (order, user) => {
     const rowY = doc.y + 5;
     const cols = [
       `${item.name}`,
-      `₹${item.price.toFixed(2)}`,
-      `₹${(item.price - item.salePrice).toFixed(2)}`,
-      `₹${item.salePrice.toFixed(2)}`,
+      `₹${(item.price|| 0).toFixed(2)}`,
+      `₹${(item.price|| 0) - (item.salePrice|| 0).toFixed(2)}`,
+      `₹${(item.quantity|| 0).toFixed(2)}`,
+      `₹${(item.salePrice|| 0) * (item.quantity|| 0).toFixed(2)}`,
     ];
     addTableRow(doc, rowY, cols, headerWidths, ['left', 'right', 'right', 'right', 'right']);
     doc.moveDown();
@@ -64,9 +65,7 @@ export const generateInvoice = (order, user) => {
 
   // Totals
   doc.moveDown(2);
-  doc.font('Helvetica-Bold').text(`Total excl. GST: ₹${order.totalExclGST.toFixed(2)}`, { align: 'right' });
-  doc.text(`Total incl. GST: ₹${order.total.toFixed(2)}`, { align: 'right' });
-  doc.text(`Amount Due (INR): ₹${order.amountDue.toFixed(2)}`, { align: 'right' });
+  doc.text(`Total incl. GST: ₹${(order.total|| 0).toFixed(2)}`, { align: 'right' });
 
   return doc;
 };
