@@ -1,5 +1,6 @@
 import { connectDB } from '../lib/db.js'; // Import the connectDB function
 import { Order } from '../models/order.js';
+import { User } from '../models/user.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { NotFoundError, ValidationError } from '../utils/errors.js';
 import { generateInvoice } from '../utils/invoice.js';
@@ -177,6 +178,7 @@ export const generateOrderInvoice = asyncHandler(async (req, res) => {
     }
 
     const invoice = generateInvoice(order, user);
+    console.log('Invoice generated successfully:', invoice);
 
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename=invoice-${order._id}.pdf`);
