@@ -1,6 +1,6 @@
 import PDFDocument from 'pdfkit';
 
-export const generateInvoice = (order, user, res) => {
+export const generateInvoice = (order, user) => {
   console.log('Generating invoice for order:', order, 'user:', user);
   const doc = new PDFDocument();
 
@@ -71,3 +71,4 @@ export const generateInvoice = (order, user, res) => {
   doc.pipe(res);
   doc.end();
 };
+
