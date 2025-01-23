@@ -51,22 +51,7 @@ export const generateInvoice = (order, user) => {
   // Invoice Details
   doc.font('Helvetica-Bold').fontSize(14).text(`Invoice #: ${order._id}`);
   doc.font('Helvetica').fontSize(12).text(`Invoice Issued: ${formatDate(new Date(order.createdAt))}`);
-
-    // Invoice Amount with DejaVuSerif for rupee symbol
-  const invoiceAmountText = `Invoice Amount: ₹${(order.total || 0).toFixed(2)} (INR)`;
-  const invoiceAmountParts = invoiceAmountText.split('₹');
-  const invoiceAmountPart1 = invoiceAmountParts[0]; // "Invoice Amount: "
-  const invoiceAmountPart2 = '₹'; // Rupee symbol
-  const invoiceAmountPart3 = invoiceAmountParts[1]; // "(order.total || 0).toFixed(2) (INR)"
-
-  const part1Width = doc.widthOfString(invoiceAmountPart1, { font: 'Helvetica', size: 12 });
-  const part2Width = doc.widthOfString(invoiceAmountPart2, { font: 'DejaVuSerif', size: 12 });
-  const part3Width = doc.widthOfString(invoiceAmountPart3, { font: 'Helvetica', size: 12 });
-
-  const invoiceAmountX = 50; // Start position for the invoice amount text
-  doc.font('Helvetica').fontSize(12).text(invoiceAmountPart1, invoiceAmountX, doc.y);
-  doc.font('DejaVuSerif').fontSize(12).text(invoiceAmountPart2, invoiceAmountX + part1Width, doc.y);
-  doc.font('Helvetica').fontSize(12).text(invoiceAmountPart3, invoiceAmountX + part1Width + part2Width, doc.y);
+  doc.font('Helvetica').fontSize(12).text(`Invoice Amount: Rs.${(order.total || 0).toFixed(2)} (INR)`);
   doc.moveDown();
 
   // PAID Status
@@ -103,7 +88,7 @@ export const generateInvoice = (order, user) => {
     doc.moveDown();
   });
 
-    // Totals
+  // Totals
   doc.moveDown(2);
   doc.font('Helvetica-Bold').fontSize(14);
   const totalText = `Total incl. GST: `;
