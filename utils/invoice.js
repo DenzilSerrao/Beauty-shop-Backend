@@ -90,21 +90,11 @@ export const generateInvoice = (order, user) => {
 
   // Totals
   doc.moveDown(2);
-  doc.font('Helvetica-Bold').fontSize(14);
-  const totalText = `Total incl. GST: `;
-  const totalAmountText = `₹${(order.total || 0).toFixed(2)}`;
-
-  // Measure the width of the totalText
-  const totalTextWidth = doc.widthOfString(totalText, { font: 'Helvetica-Bold', size: 14 });
-
-  // Set the position for the totalAmountText
-  const totalX = 70 + totalTextWidth;
+  doc.font('DejaVuSerif').fontSize(14);
+  const totalText = `Total incl. GST: ₹${(order.total || 0).toFixed(2)}`;
 
   // Draw the totalText
   doc.text(totalText, 40, doc.y);
-
-  // Draw the totalAmountText at the calculated position
-  doc.font('DejaVuSerif').fontSize(14).text(totalAmountText, totalX, doc.y);
 
   doc.moveDown();
 
