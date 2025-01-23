@@ -20,7 +20,7 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Failed to connect to the database' });
   }
 
-  // // Verify user auth
+  // Verify user auth
   const authResult = await userAuth(req, res);
   if (authResult?.error) {
     console.error('User authentication failed:', authResult.error);
