@@ -20,20 +20,18 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Failed to connect to the database' });
   }
 
-  // Verify user auth
-  const authResult = await userAuth(req, res);
-  if (authResult?.error) {
-    console.error('User authentication failed:', authResult.error);
-    return res.status(401).json({ error: authResult.error });
-  }
-  console.log('User authentication successful');
+  // // Verify user auth
+  // const authResult = await userAuth(req, res);
+  // if (authResult?.error) {
+  //   console.error('User authentication failed:', authResult.error);
+  //   return res.status(401).json({ error: authResult.error });
+  // }
+  // console.log('User authentication successful');
 
   if (req.method === 'GET') {
     try {
       console.log('Handling GET request for order invoice');
-      const invoice = await generateOrderInvoice(req, res);
-      console.log('Order invoice fetched successfully:', invoice);
-      res.status(200).json(invoice);
+      return generateOrderInvoice(req, res);
     } catch (error) {
       console.error('Get order invoice error:', error);
       res.status(500).json({ error: 'Internal server error' });

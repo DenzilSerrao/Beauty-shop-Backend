@@ -11,7 +11,6 @@ export const getOrders = asyncHandler(async (req, res) => {
   await connectDB();
 
   try {
-    console.log('req:', req.user);
     const userId = req.user.id; // Adjust based on your auth setup
 
     // Validate userId
@@ -31,7 +30,7 @@ export const getOrders = asyncHandler(async (req, res) => {
       return res.status(404).json({ status: 'fail', message: 'No orders found for this user' });
     }
 
-    console.log('Orders fetched successfully:', orders);
+    console.log('Orders fetched successfully');
 
     return res.status(200).json({
       status: 'success',
@@ -153,30 +152,36 @@ export const generateOrderInvoice = asyncHandler(async (req, res) => {
   try {
     const { orderId } = req.query;
     const { userId } = req.query;
-    console.log('The request conatins :', req.params, 'and user:', req.query);
-    console.log('Generating invoice for order:', orderId, 'and user:', userId);
-
+    console.log('Fetching order invoice:', orderId, userId);
     // Validate orderId and userId
     if (!mongoose.Types.ObjectId.isValid(orderId)) {
-      throw new ValidationError('Invalid order ID');
+      throw new Error('Invalid order ID');
     }
     if (!mongoose.Types.ObjectId.isValid(userId)) {
-      throw new ValidationError('Invalid user ID');
+      throw new Error('Invalid user ID');
     }
 
-    const order = await Order.findById(orderId).populate('userId', 'name email');
+    const order = await Order.findById(orderId);
     if (!order) {
-      throw new NotFoundError('Order not found');
+      console.log('Order not found in database');
+      throw new Error('Order not found');
     }
 
+    console.log('Order fetched successfully:', order);
+
+    console.log('Fetching user with ID:', userId);
     const user = await User.findById(userId);
     if (!user) {
-      throw new NotFoundError('User not found');
+      console.log('User not found in database');
+      throw new Error('User not found');
     }
 
+    console.log('User fetched successfully:', user);
+
     // Check if the user owns the order
-    if (order.userId.toString() !== user.id) {
-      throw new NotFoundError('Forbidden: User does not own this order');
+    if (order.userId.toString() !== userId) {
+      console.log('User does not own the order');
+      throw new Error('Forbidden: User does not own this order');
     }
 
     const invoice = generateInvoice(order, user);
@@ -189,6 +194,6 @@ export const generateOrderInvoice = asyncHandler(async (req, res) => {
     invoice.end();
   } catch (error) {
     console.error('Error fetching order invoice:', error);
-    throw new Error('Failed to fetch order invoice');
+    res.status(500).json({ error: 'Failed to fetch order invoice' });
   }
 });
