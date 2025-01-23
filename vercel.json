@@ -9,6 +9,6 @@
   "rewrites": [
     { "source": "/api/orders/:orderId", "destination": "/api/orders/[orderId]" },
     { "source": "/api/orders/:orderId/invoice", "destination": "/api/orders/[orderId]/invoice" },
-    { "source": "/api/admin/:orderId", "destination": "/api/admin/[orderId]" }
+    { "source": "/api/admin/orders/:orderId", "destination": "/api/admin/orders/[orderId]" }
   ]
 }
