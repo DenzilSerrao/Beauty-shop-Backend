@@ -28,7 +28,7 @@ export const generateInvoice = (order, user) => {
 
       // Check if the column contains the rupee symbol and switch fonts accordingly
       if (col.includes('₹')) {
-        doc.font('DejaVuSerif-Bold').fontSize(12).text(col, x, y, textOptions);
+        doc.font('DejaVuSerif').fontSize(12).text(col, x, y, textOptions);
       } else {
         doc.font('Helvetica').fontSize(12).text(col, x, y, textOptions);
       }
@@ -92,7 +92,7 @@ export const generateInvoice = (order, user) => {
   const totalAmountTextWidth = doc.widthOfString(totalAmountText, { font: 'DejaVuSerif-Bold', size: 14 });
   const totalX = 550 - totalAmountTextWidth - 50; // Align the amount to the right margin
   doc.text(totalText, 550 - totalTextWidth - totalAmountTextWidth - 50, doc.y); // Position the text before the amount
-  doc.font('DejaVuSerif-Bold').fontSize(14).text(totalAmountText, totalX, doc.y);
+  doc.font('DejaVuSerif').fontSize(14).text(totalAmountText, totalX, doc.y);
 
   // Footer
   doc.moveDown(2);
