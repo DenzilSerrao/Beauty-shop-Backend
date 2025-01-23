@@ -50,7 +50,7 @@ export const generateInvoice = (order, user) => {
 
   // Invoice Details
   doc.font('Helvetica-Bold').fontSize(14).text(`Invoice #: ${order._id}`);
-  doc.font('Helvetica').fontSize(12).text(`Invoice Issued: ${formatDate(new Date())}`); // Use current date
+  doc.font('Helvetica').fontSize(12).text(`Invoice Issued: ${formatDate(new Date(order.createdAt))}`);
 
   // Invoice Amount with DejaVuSerif for rupee symbol
   const invoiceAmountText = `Invoice Amount: ₹${(order.total || 0).toFixed(2)} (INR)`;
@@ -59,10 +59,8 @@ export const generateInvoice = (order, user) => {
   const invoiceAmountPart2 = `₹${invoiceAmountParts[1]}`;
 
   const part1Width = doc.widthOfString(invoiceAmountPart1, { font: 'Helvetica', size: 12 });
-  const part2Width = doc.widthOfString(invoiceAmountPart2, { font: 'DejaVuSerif', size: 12 });
-  const invoiceAmountX = 295 - ((part1Width + part2Width) / 2); // Center the invoice amount text
-  doc.font('Helvetica').fontSize(12).text(invoiceAmountPart1, invoiceAmountX, doc.y);
-  doc.font('DejaVuSerif').fontSize(12).text(invoiceAmountPart2, invoiceAmountX + part1Width, doc.y);
+  doc.font('Helvetica').fontSize(12).text(invoiceAmountPart1, 40, doc.y);
+  doc.font('DejaVuSerif').fontSize(12).text(invoiceAmountPart2, 40 + part1Width, doc.y);
   doc.moveDown();
 
   // PAID Status
@@ -70,12 +68,12 @@ export const generateInvoice = (order, user) => {
   doc.fillColor('black');
 
   // Billed To Section
-  doc.font('Helvetica-Bold').fontSize(14).text('BILLED TO:');
+  doc.font('Helvetica-Bold').fontSize(14).text('BILLED TO:', 40, doc.y); // Align to the left
   doc.font('Helvetica').fontSize(12);
-  doc.text(user.name);
-  doc.text(order.shippingAddress);
-  doc.text(user.email);
-  doc.text(order.customerPhone);
+  doc.text(user.name, 40, doc.y);
+  doc.text(order.shippingAddress, 40, doc.y);
+  doc.text(user.email, 40, doc.y);
+  doc.text(order.customerPhone, 40, doc.y);
   doc.moveDown(2);
 
   // Table Headers
@@ -83,7 +81,7 @@ export const generateInvoice = (order, user) => {
   const headerWidths = [180, 60, 80, 90, 110];
   const headerY = doc.y;
   addTableRow(doc, headerY, headers, headerWidths, ['left', 'right', 'right', 'right', 'right']);
-  doc.moveTo(40, headerY + 15).lineTo(520, headerY + 25).stroke(); // Adjusted line position for reduced left margin
+  doc.moveTo(40, headerY + 15).lineTo(550, headerY + 15).stroke(); // Adjusted line position for reduced left margin
 
   // Table Rows
   order.items.forEach((item) => {
@@ -92,7 +90,7 @@ export const generateInvoice = (order, user) => {
       `${item.name}`,
       `₹${(item.salePrice || 0).toFixed(2)}`,
       `₹${((item.price || 0) - (item.salePrice || 0)).toFixed(2)}`,
-      `${(item.quantity || 0).toFixed(2)}`,
+      `${(item.quantity || 0).toString()}`,
       `₹${((item.salePrice || 0) * (item.quantity || 0)).toFixed(2)}`,
     ];
     addTableRow(doc, rowY, cols, headerWidths, ['left', 'right', 'right', 'right', 'right']);
