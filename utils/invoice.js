@@ -9,13 +9,11 @@ const __dirname = path.dirname(__filename);
 
 export const generateInvoice = (order, user) => {
   console.log('Generating invoice for order:', order, 'user:', user);
-  const doc = new PDFDocument({ size: 'A4', margin: { top: 50, left: 40, right: 40, bottom: 50 } }); // Reduced left margin
+  const doc = new PDFDocument({ size: 'A4', margin: 40 }); // Globally reduced left margin
 
-  // Load and register the DejaVuSerif and DejaVuSerif-Bold fonts for the rupee symbol
+  // Load and register the DejaVuSerif font for the rupee symbol
   const fontPathDejaVuSerif = path.join(__dirname, 'DejaVuSerif.ttf'); // Ensure the font file is in the same directory
-  // const fontPathDejaVuSerifBold = path.join(__dirname, 'DejaVuSerif-Bold.ttf'); // Ensure the font file is in the same directory
   doc.registerFont('DejaVuSerif', fontPathDejaVuSerif);
-  // doc.registerFont('DejaVuSerif-Bold', fontPathDejaVuSerifBold);
 
   // Helper function to add a table row
   const addTableRow = (doc, y, cols, widths, alignments = []) => {
@@ -52,17 +50,19 @@ export const generateInvoice = (order, user) => {
 
   // Invoice Details
   doc.font('Helvetica-Bold').fontSize(14).text(`Invoice #: ${order._id}`);
-  doc.font('Helvetica').fontSize(12).text(`Invoice Issued: ${formatDate(new Date(order.createdAt))}`);
+  doc.font('Helvetica').fontSize(12).text(`Invoice Issued: ${formatDate(new Date())}`); // Use current date
 
-  // Invoice Amount with DejaVuSerif-Bold for rupee symbol
+  // Invoice Amount with DejaVuSerif for rupee symbol
   const invoiceAmountText = `Invoice Amount: ₹${(order.total || 0).toFixed(2)} (INR)`;
   const invoiceAmountParts = invoiceAmountText.split('₹');
   const invoiceAmountPart1 = invoiceAmountParts[0];
   const invoiceAmountPart2 = `₹${invoiceAmountParts[1]}`;
 
   const part1Width = doc.widthOfString(invoiceAmountPart1, { font: 'Helvetica', size: 12 });
-  doc.font('Helvetica').fontSize(12).text(invoiceAmountPart1, 40, doc.y);
-  doc.font('DejaVuSerif').fontSize(12).text(invoiceAmountPart2, 40 + part1Width, doc.y);
+  const part2Width = doc.widthOfString(invoiceAmountPart2, { font: 'DejaVuSerif', size: 12 });
+  const invoiceAmountX = 295 - ((part1Width + part2Width) / 2); // Center the invoice amount text
+  doc.font('Helvetica').fontSize(12).text(invoiceAmountPart1, invoiceAmountX, doc.y);
+  doc.font('DejaVuSerif').fontSize(12).text(invoiceAmountPart2, invoiceAmountX + part1Width, doc.y);
   doc.moveDown();
 
   // PAID Status
@@ -83,16 +83,16 @@ export const generateInvoice = (order, user) => {
   const headerWidths = [180, 60, 80, 90, 110];
   const headerY = doc.y;
   addTableRow(doc, headerY, headers, headerWidths, ['left', 'right', 'right', 'right', 'right']);
-  doc.moveTo(40, headerY + 15).lineTo(520, headerY + 15).stroke(); // Adjusted line position for reduced left margin
+  doc.moveTo(40, headerY + 15).lineTo(520, headerY + 25).stroke(); // Adjusted line position for reduced left margin
 
   // Table Rows
   order.items.forEach((item) => {
     const rowY = doc.y + 5;
     const cols = [
       `${item.name}`,
-      `₹${(item.price || 0).toFixed(2)}`,
+      `₹${(item.salePrice || 0).toFixed(2)}`,
       `₹${((item.price || 0) - (item.salePrice || 0)).toFixed(2)}`,
-      `${(item.quantity || 0).toString()}`,
+      `${(item.quantity || 0).toFixed(2)}`,
       `₹${((item.salePrice || 0) * (item.quantity || 0)).toFixed(2)}`,
     ];
     addTableRow(doc, rowY, cols, headerWidths, ['left', 'right', 'right', 'right', 'right']);
@@ -102,16 +102,13 @@ export const generateInvoice = (order, user) => {
   // Totals
   doc.moveDown(2);
   doc.font('Helvetica-Bold').fontSize(14);
-  const totalText = `Total incl. GST: `;
-  const totalAmountText = `₹${(order.total || 0).toFixed(2)}`;
-  const totalTextWidth = doc.widthOfString(totalText, { font: 'Helvetica-Bold', size: 14 });
-  const totalAmountTextWidth = doc.widthOfString(totalAmountText, { font: 'DejaVuSerif', size: 14 });
-  const totalX = 520 - totalAmountTextWidth - 40; // Align the amount to the right margin with reduced left margin
-  doc.text(totalText, 520 - totalTextWidth - totalAmountTextWidth - 40, doc.y); // Position the text before the amount
-  doc.font('DejaVuSerif').fontSize(14).text(totalAmountText, totalX, doc.y);
+  const totalText = `Total incl. GST: ₹${(order.total || 0).toFixed(2)}`;
+  const totalWidth = doc.widthOfString(totalText, { font: 'Helvetica-Bold', size: 14 });
+  const totalX = 295 - (totalWidth / 2); // Center the total text
+  doc.text(totalText, totalX, doc.y, { align: 'center' });
+  doc.moveDown();
 
   // Footer
-  doc.moveDown(2);
   doc.font('Helvetica').fontSize(12).text('Thank you for shopping with ANA Beauty!', { align: 'center' });
 
   return doc;
