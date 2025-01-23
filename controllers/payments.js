@@ -88,7 +88,7 @@ export const verifyPayment = asyncHandler(async (req, res) => {
         amount,
         status: 'completed'
       });
-
+      console.log('Payment verified successfully');
       res.json({ success: true });
     } else {
       res.status(400).json({ error: 'Invalid signature' });

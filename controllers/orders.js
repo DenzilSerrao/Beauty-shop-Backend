@@ -134,7 +134,8 @@ export const s_createOrder = async (orderData) => {
       customerEmail,
       customerPhone
     });
-
+    console.log('Order created successfully in the database:', order);
+    
     return {
       status: 'success',
       data: { order }
