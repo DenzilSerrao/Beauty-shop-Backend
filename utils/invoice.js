@@ -12,7 +12,7 @@ export const generateInvoice = (order, user) => {
   const doc = new PDFDocument({ size: 'A4', margin: 50 });
 
   // Load and register the DejaVuSans font for the rupee symbol
-  const fontPath = path.join(__dirname, 'DejaVuSans.ttf'); // Ensure the font file is in the same directory
+  const fontPath = path.join(__dirname, 'DejaVuSerif.ttf'); // Ensure the font file is in the same directory
   doc.registerFont('DejaVuSans', fontPath);
 
   // Helper function to add a table row
