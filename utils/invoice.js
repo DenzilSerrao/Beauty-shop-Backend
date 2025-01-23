@@ -11,9 +11,9 @@ export const generateInvoice = (order, user) => {
   console.log('Generating invoice for order:', order, 'user:', user);
   const doc = new PDFDocument({ size: 'A4', margin: 40 }); // Globally reduced left margin
 
-  // Load and register the DejaVuSerif font for the rupee symbol
-  const fontPathDejaVuSerif = path.join(__dirname, 'DejaVuSerif.ttf'); // Ensure the font file is in the same directory
-  doc.registerFont('DejaVuSerif', fontPathDejaVuSerif);
+  // Load and register the NotoSans-Regular font for the rupee symbol
+  const fontPathNotoSans = path.join(__dirname, 'NotoSans-Regular.ttf'); // Ensure the font file is in the same directory
+  doc.registerFont('NotoSans', fontPathNotoSans);
 
   // Helper function to add a table row
   const addTableRow = (doc, y, cols, widths, alignments = []) => {
@@ -26,7 +26,7 @@ export const generateInvoice = (order, user) => {
 
       // Check if the column contains the rupee symbol and switch fonts accordingly
       if (col.includes('₹')) {
-        doc.font('DejaVuSerif').fontSize(12).text(col, x, y, textOptions);
+        doc.font('NotoSans').fontSize(12).text(col, x, y, textOptions);
       } else {
         doc.font('Helvetica').fontSize(12).text(col, x, y, textOptions);
       }
@@ -90,7 +90,7 @@ export const generateInvoice = (order, user) => {
 
   // Totals
   doc.moveDown(2);
-  doc.font('DejaVuSerif').fontSize(14);
+  doc.font('NotoSans').fontSize(14);
   const totalText = `Total incl. GST: ₹${(order.total || 0).toFixed(2)}`;
 
   // Draw the totalText
@@ -101,5 +101,6 @@ export const generateInvoice = (order, user) => {
   // Footer
   doc.moveDown(2);
   doc.font('Helvetica').fontSize(12).text('Thank you for shopping with ANA Beauty!', { align: 'center' });
-    return doc;
+
+  return doc;
 };
