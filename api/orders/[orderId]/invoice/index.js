@@ -21,12 +21,12 @@ export default async function handler(req, res) {
   }
 
   // // Verify user auth
-  // const authResult = await userAuth(req, res);
-  // if (authResult?.error) {
-  //   console.error('User authentication failed:', authResult.error);
-  //   return res.status(401).json({ error: authResult.error });
-  // }
-  // console.log('User authentication successful');
+  const authResult = await userAuth(req, res);
+  if (authResult?.error) {
+    console.error('User authentication failed:', authResult.error);
+    return res.status(401).json({ error: authResult.error });
+  }
+  console.log('User authentication successful');
 
   if (req.method === 'GET') {
     try {
