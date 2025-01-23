@@ -43,7 +43,7 @@ export const generateInvoice = (order, user) => {
   doc.moveDown(2);
 
   // Table Headers
-  const headers = ['DESCRIPTION', 'PRICE', 'DISCOUNT', 'TOTAL EXCL. GST', 'GST AMOUNT (INR)'];
+  const headers = ['DESCRIPTION', 'PRICE', 'DISCOUNT', 'TOTAL INCL. GST'];
   const headerWidths = [200, 60, 60, 100, 100];
   const headerY = doc.y;
   addTableRow(doc, headerY, headers, headerWidths, ['left', 'right', 'right', 'right', 'right']);
@@ -53,11 +53,10 @@ export const generateInvoice = (order, user) => {
   order.items.forEach((item) => {
     const rowY = doc.y + 5;
     const cols = [
-      `${item.name} (${item.duration || 'N/A'})`,
+      `${item.name}`,
       `₹${item.price.toFixed(2)}`,
       `₹${(item.price - item.salePrice).toFixed(2)}`,
       `₹${item.salePrice.toFixed(2)}`,
-      `₹${item.gstAmount.toFixed(2)}`,
     ];
     addTableRow(doc, rowY, cols, headerWidths, ['left', 'right', 'right', 'right', 'right']);
     doc.moveDown();
