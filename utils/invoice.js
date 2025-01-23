@@ -11,9 +11,11 @@ export const generateInvoice = (order, user) => {
   console.log('Generating invoice for order:', order, 'user:', user);
   const doc = new PDFDocument({ size: 'A4', margin: 50 });
 
-  // Load and register the DejaVuSans font for the rupee symbol
-  const fontPath = path.join(__dirname, 'DejaVuSerif.ttf'); // Ensure the font file is in the same directory
-  doc.registerFont('DejaVuSans', fontPath);
+  // Load and register the DejaVuSerif and DejaVuSerif-Bold fonts for the rupee symbol
+  const fontPathDejaVuSerif = path.join(__dirname, 'DejaVuSerif.ttf'); // Ensure the font file is in the same directory
+  const fontPathDejaVuSerifBold = path.join(__dirname, 'DejaVuSerif-Bold.ttf'); // Ensure the font file is in the same directory
+  doc.registerFont('DejaVuSerif', fontPathDejaVuSerif);
+  doc.registerFont('DejaVuSerif-Bold', fontPathDejaVuSerifBold);
 
   // Helper function to add a table row
   const addTableRow = (doc, y, cols, widths, alignments = []) => {
@@ -26,7 +28,7 @@ export const generateInvoice = (order, user) => {
 
       // Check if the column contains the rupee symbol and switch fonts accordingly
       if (col.includes('₹')) {
-        doc.font('DejaVuSans').fontSize(12).text(col, x, y, textOptions);
+        doc.font('DejaVuSerif-Bold').fontSize(12).text(col, x, y, textOptions);
       } else {
         doc.font('Helvetica').fontSize(12).text(col, x, y, textOptions);
       }
@@ -83,7 +85,18 @@ export const generateInvoice = (order, user) => {
 
   // Totals
   doc.moveDown(2);
-  doc.font('Helvetica-Bold').fontSize(14).text(`Total incl. GST: ₹${(order.total || 0).toFixed(2)}`, { align: 'right' });
+  doc.font('Helvetica-Bold').fontSize(14);
+  const totalText = `Total incl. GST: `;
+  const totalAmountText = `₹${(order.total || 0).toFixed(2)}`;
+  const totalTextWidth = doc.widthOfString(totalText, { font: 'Helvetica-Bold', size: 14 });
+  const totalAmountTextWidth = doc.widthOfString(totalAmountText, { font: 'DejaVuSerif-Bold', size: 14 });
+  const totalX = 550 - totalAmountTextWidth - 50; // Align the amount to the right margin
+  doc.text(totalText, 550 - totalTextWidth - totalAmountTextWidth - 50, doc.y); // Position the text before the amount
+  doc.font('DejaVuSerif-Bold').fontSize(14).text(totalAmountText, totalX, doc.y);
+
+  // Footer
+  doc.moveDown(2);
+  doc.font('Helvetica').fontSize(12).text('Thank you for shopping with ANA Beauty!', { align: 'center' });
 
   return doc;
 };
