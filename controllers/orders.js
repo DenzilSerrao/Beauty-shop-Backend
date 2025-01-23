@@ -151,7 +151,7 @@ export const generateOrderInvoice = asyncHandler(async (req, res) => {
   await connectDB();
 
   try {
-    const { orderId } = req.params;
+    const { orderId } = req.query;
     const { userId } = req.query;
     console.log('The request conatins :', req.params, 'and user:', req.query);
     console.log('Generating invoice for order:', orderId, 'and user:', userId);

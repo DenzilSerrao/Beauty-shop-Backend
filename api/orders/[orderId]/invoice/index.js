@@ -8,7 +8,6 @@ export default async function handler(req, res) {
   if (corsMiddleware(req, res)) {
     return; // Exit if the CORS middleware has handled the request
   }
-
   console.log('Applying CORS middleware successfully');
 
   // Ensure database connection is established before proceeding
