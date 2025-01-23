@@ -2,6 +2,7 @@ import { corsMiddleware } from '../../../middleware/corsMiddleware.js';
 import userAuth from '../../../middleware/userAuth.js';
 import { connectDB } from '../../../lib/db.js';
 import { s_createOrder } from '../../../controllers/orders.js';
+import razorpay from '../../../config/razorpay.js';
 
 export default async function handler(req, res) {
   // Apply CORS middleware
@@ -20,13 +21,13 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Failed to connect to the database' });
   }
 
-  // // Verify user auth
-  // const authResult = await userAuth(req, res);
-  // if (authResult?.error) {
-  //   console.error('User authentication failed:', authResult.error);
-  //   return res.status(401).json({ error: authResult.error });
-  // }
-  // console.log('User authentication successful');
+  // Verify user auth
+  const authResult = await userAuth(req, res);
+  if (authResult?.error) {
+    console.error('User authentication failed:', authResult.error);
+    return res.status(401).json({ error: authResult.error });
+  }
+  console.log('User authentication successful');
 
   if (req.method === 'POST') {
     try {
