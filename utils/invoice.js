@@ -81,7 +81,7 @@ export const generateInvoice = (order, user) => {
       `${item.name}`,
       `₹${(item.salePrice || 0).toFixed(2)}`,
       `₹${((item.price || 0) - (item.salePrice || 0)).toFixed(2)}`,
-      `${(item.quantity || 0).toString()}`,
+      `${(item.quantity || 0).toFixed(2)}`,
       `₹${((item.salePrice || 0) * (item.quantity || 0)).toFixed(2)}`,
     ];
     addTableRow(doc, rowY, cols, headerWidths, ['left', 'right', 'right', 'right', 'right']);
