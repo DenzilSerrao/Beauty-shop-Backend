@@ -16,7 +16,7 @@ export const generateInvoice = (order, user) => {
   doc.registerFont('NotoSans', fontPathNotoSans);
 
   // Helper function to add a table row
-  const addTableRow = (doc, y, cols, widths, alignments = []) => {
+  const addTableRow = (doc, y, cols, widths, alignments = [], backgroundColor = null) => {
     if (backgroundColor) {
       doc.rect(40, y, 530, 15).fill(backgroundColor).fillOpacity(0.2).strokeOpacity(0);
     }
