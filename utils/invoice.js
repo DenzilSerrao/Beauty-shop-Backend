@@ -7,7 +7,7 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-export const generateOrderInvoice = (order, user, res) => {
+export const generateOrderInvoice = (order, user) => {
   console.log('Generating invoice for order:', order, 'user:', user);
 
   const doc = new PDFDocument({ size: 'A4', margin: 40 }); // Globally reduced left margin
@@ -16,7 +16,7 @@ export const generateOrderInvoice = (order, user, res) => {
   const fontPathNotoSans = path.join(__dirname, 'NotoSans-Regular.ttf'); // Ensure the font file is in the same directory
   if (!fs.existsSync(fontPathNotoSans)) {
     console.error(`Font file not found: ${fontPathNotoSans}`);
-    return res.status(500).json({ message: 'Failed to generate invoice' });
+    throw new Error('Failed to find NotoSans-Regular.ttf font file');
   }
   doc.registerFont('NotoSans', fontPathNotoSans);
 
@@ -53,7 +53,7 @@ export const generateOrderInvoice = (order, user, res) => {
   const ventureFutureLogoPath = path.join(__dirname, 'venture_future_logo.jpg'); // Ensure the logo file is in the same directory
   if (!fs.existsSync(ventureFutureLogoPath)) {
     console.error(`Logo file not found: ${ventureFutureLogoPath}`);
-    return res.status(500).json({ message: 'Failed to generate invoice' });
+    throw new Error('Failed to find venture_future_logo.jpg logo file');
   }
   doc.image(ventureFutureLogoPath, 40, 20, { fit: [100, 100], align: 'left', valign: 'top' });
 
@@ -61,9 +61,9 @@ export const generateOrderInvoice = (order, user, res) => {
   const anaBeautyLogoPath = path.join(__dirname, 'ana_beauty_logo.png'); // Ensure the logo file is in the same directory
   if (!fs.existsSync(anaBeautyLogoPath)) {
     console.error(`Logo file not found: ${anaBeautyLogoPath}`);
-    return res.status(500).json({ message: 'Failed to generate invoice' });
+    throw new Error('Failed to find ana_beauty_logo.png logo file');
   }
-  doc.image(anaBeautyLogoPath, 450, 35, { fit: [100, 100], align: 'right', valign: 'top' });
+  doc.image(anaBeautyLogoPath, 450, 20, { fit: [100, 100], align: 'right', valign: 'top' });
 
   // Header Text
   doc.moveDown(3);
@@ -127,13 +127,15 @@ export const generateOrderInvoice = (order, user, res) => {
   doc.moveDown(2);
   doc.font('Helvetica').fontSize(12).text('Thank you for shopping with ANA Beauty!', { align: 'center' });
 
-  // Set the response headers
-  res.setHeader('Content-Type', 'application/pdf');
-  res.setHeader('Content-Disposition', `attachment; filename="invoice-${order._id}.pdf"`);
+  // // Capture the PDF data
+  // const buffers = [];
+  // doc.on('data', (chunk) => buffers.push(chunk));
+  // doc.on('end', () => {
+  //   const pdfData = Buffer.concat(buffers);
+  //   resolve(pdfData);
+  // });
 
-  // Pipe the PDF document to the response
-  doc.pipe(res);
-
-  // Finalize the PDF and close the response
-  doc.end();
+  // // Finalize the PDF and close the document
+  // doc.end();
+  return doc;
 };
