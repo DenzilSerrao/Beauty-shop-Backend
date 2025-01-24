@@ -13,6 +13,10 @@ export const generateInvoice = (order, user) => {
 
   // Load and register the NotoSans-Regular font for the rupee symbol
   const fontPathNotoSans = path.join(__dirname, 'NotoSans-Regular.ttf'); // Ensure the font file is in the same directory
+  if (!fs.existsSync(fontPathNotoSans)) {
+    console.error(`Font file not found: ${fontPathNotoSans}`);
+    return null;
+  }
   doc.registerFont('NotoSans', fontPathNotoSans);
 
   // Helper function to add a table row
@@ -46,13 +50,19 @@ export const generateInvoice = (order, user) => {
 
   // Add Venture Future Logo
   const ventureFutureLogoPath = path.join(__dirname, 'venture_future_logo.jpeg'); // Ensure the logo file is in the same directory
-  // const ventureFutureLogoPath = path.join(__dirname, 'test1.png'); // Ensure the logo file is in the same directory
+  if (!fs.existsSync(ventureFutureLogoPath)) {
+    console.error(`Logo file not found: ${ventureFutureLogoPath}`);
+    return null;
+  }
   doc.image(ventureFutureLogoPath, 40, 20, { fit: [100, 100], align: 'left', valign: 'top' });
 
   // Add Ana Beauty Logo
   const anaBeautyLogoPath = path.join(__dirname, 'ana_beauty_logo.png'); // Ensure the logo file is in the same directory
-  // const anaBeautyLogoPath = path.join(__dirname, 'test2.png'); // Ensure the logo file is in the same directory
-  doc.image(anaBeautyLogoPath, 450, 35, { fit: [100, 100], align: 'right', valign: 'top' });
+  if (!fs.existsSync(anaBeautyLogoPath)) {
+    console.error(`Logo file not found: ${anaBeautyLogoPath}`);
+    return null;
+  }
+  doc.image(anaBeautyLogoPath, 450, 20, { fit: [100, 100], align: 'right', valign: 'top' });
 
   // Header Text
   doc.moveDown(3);
@@ -119,39 +129,21 @@ export const generateInvoice = (order, user) => {
   return doc;
 };
 
-// // Example usage to save the PDF to a file
-// const order = {
-//   _id: 'INV12345',
-//   createdAt: new Date(),
-//   total: 37.45,
-//   items: [
-//     { name: 'Product A', salePrice: 10.00, price: 12.00, quantity: 2 },
-//     { name: 'Product B', salePrice: 15.00, price: 18.00, quantity: 1 },
-//   ],
-// };
+// Example usage to generate and send the PDF as a binary response
+export const sendInvoice = (res, order, user) => {
+  const doc = generateInvoice(order, user);
+  if (!doc) {
+    res.status(500).send('Failed to generate invoice');
+    return;
+  }
 
-// const user = {
-//   name: 'John Doe',
-//   email: 'john.doe@example.com',
-//   customerPhone: '1234567890',
-//   shippingAddress: '123 Main St, Anytown, Anystate, 12345',
-// };
+  // Set the response headers
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', `attachment; filename="invoice-${order._id}.pdf"`);
 
-// const filePath = path.join(__dirname, 'invoice.pdf');
-// const writeStream = fs.createWriteStream(filePath);
+  // Pipe the PDF document to the response
+  doc.pipe(res);
 
-// // Pipe the PDF document to the write stream
-// const doc = generateInvoice(order, user);
-// doc.pipe(writeStream);
-
-// // Finalize the PDF and close the write stream
-// doc.end();
-
-// // Handle events on the write stream
-// writeStream.on('finish', () => {
-//   console.log(`Invoice saved to ${filePath}`);
-// });
-
-// writeStream.on('error', (err) => {
-//   console.error('Error writing PDF:', err);
-// });
+  // Finalize the PDF and close the response
+  doc.end();
+};
