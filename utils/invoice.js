@@ -50,7 +50,7 @@ export const generateInvoice = (order, user) => {
   };
 
   // Add Venture Future Logo
-  const ventureFutureLogoPath = path.join(__dirname, 'venture_future_logo.jpg'); // Ensure the logo file is in the same directory
+  const ventureFutureLogoPath = path.join(__dirname, 'venture_future_logo.jpeg'); // Ensure the logo file is in the same directory
   if (!fs.existsSync(ventureFutureLogoPath)) {
     console.error(`Logo file not found: ${ventureFutureLogoPath}`);
     throw new Error('Failed to find venture_future_logo.jpg logo file');
