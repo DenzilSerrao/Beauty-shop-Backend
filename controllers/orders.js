@@ -3,7 +3,7 @@ import { Order } from '../models/order.js';
 import { User } from '../models/user.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { NotFoundError, ValidationError } from '../utils/errors.js';
-import { generateOrderInvoice } from '../utils/invoice.js';
+import { generateInvoice } from '../utils/invoice.js';
 import mongoose from 'mongoose';
 
 export const getOrders = asyncHandler(async (req, res) => {
@@ -172,7 +172,7 @@ export const generateOrderInvoice = asyncHandler(async (req, res) => {
       throw new Error('Forbidden: User does not own this order');
     }
 
-    const invoice = generateOrderInvoice(order, user);
+    const invoice = generateInvoice(order, user);
     console.log('Invoice generated successfully:', invoice);
 
     res.setHeader('Content-Type', 'application/pdf');

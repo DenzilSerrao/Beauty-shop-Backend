@@ -7,7 +7,7 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-export const generateOrderInvoice = (order, user) => {
+export const generateInvoice = (order, user) => {
   console.log('Generating invoice for order:', order, 'user:', user);
 
   const doc = new PDFDocument({ size: 'A4', margin: 40 }); // Globally reduced left margin
