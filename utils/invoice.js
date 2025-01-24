@@ -49,21 +49,21 @@ export const generateInvoice = (order, user) => {
     return `${day}/${month}/${year}`;
   };
 
-  // Add Venture Future Logo
-  const ventureFutureLogoPath = path.join(__dirname, 'venture_future_logo.jpeg'); // Ensure the logo file is in the same directory
-  if (!fs.existsSync(ventureFutureLogoPath)) {
-    console.error(`Logo file not found: ${ventureFutureLogoPath}`);
-    throw new Error('Failed to find venture_future_logo.jpg logo file');
-  }
-  doc.image(ventureFutureLogoPath, 40, 20, { fit: [100, 100], align: 'left', valign: 'top' });
+  // // Add Venture Future Logo
+  // const ventureFutureLogoPath = path.join(__dirname, 'venture_future_logo.jpeg'); // Ensure the logo file is in the same directory
+  // if (!fs.existsSync(ventureFutureLogoPath)) {
+  //   console.error(`Logo file not found: ${ventureFutureLogoPath}`);
+  //   throw new Error('Failed to find venture_future_logo.jpeg logo file');
+  // }
+  // doc.image(ventureFutureLogoPath, 40, 20, { fit: [100, 100], align: 'left', valign: 'top' });
 
-  // Add Ana Beauty Logo
-  const anaBeautyLogoPath = path.join(__dirname, 'ana_beauty_logo.png'); // Ensure the logo file is in the same directory
-  if (!fs.existsSync(anaBeautyLogoPath)) {
-    console.error(`Logo file not found: ${anaBeautyLogoPath}`);
-    throw new Error('Failed to find ana_beauty_logo.png logo file');
-  }
-  doc.image(anaBeautyLogoPath, 450, 20, { fit: [100, 100], align: 'right', valign: 'top' });
+  // // Add Ana Beauty Logo
+  // const anaBeautyLogoPath = path.join(__dirname, 'ana_beauty_logo.png'); // Ensure the logo file is in the same directory
+  // if (!fs.existsSync(anaBeautyLogoPath)) {
+  //   console.error(`Logo file not found: ${anaBeautyLogoPath}`);
+  //   throw new Error('Failed to find ana_beauty_logo.png logo file');
+  // }
+  // doc.image(anaBeautyLogoPath, 450, 20, { fit: [100, 100], align: 'right', valign: 'top' });
 
   // Header Text
   doc.moveDown(3);
