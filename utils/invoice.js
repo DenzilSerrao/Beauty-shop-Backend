@@ -16,7 +16,7 @@ export const generateInvoice = (order, user) => {
   doc.registerFont('NotoSans', fontPathNotoSans);
 
   // Helper function to add a table row
-  const addTableRow = (doc, y, cols, widths, alignments = [], backgroundColor = null) => {
+  const addTableRow = (doc, y, cols, widths, alignments = []) => {
     if (backgroundColor) {
       doc.rect(40, y, 530, 15).fill(backgroundColor).fillOpacity(0.2).strokeOpacity(0);
     }
@@ -44,16 +44,7 @@ export const generateInvoice = (order, user) => {
     return `${day}/${month}/${year}`;
   };
 
-  // // **Added: Add Venture Future Logo**
-  // const ventureFutureLogoPath = path.join(__dirname, 'venture_future_logo.jpeg'); // Ensure the logo file is in the same directory
-  // doc.image(ventureFutureLogoPath, 40, 20, { fit: [100, 100], align: 'left', valign: 'top' });
-
-  // // **Added: Add Ana Beauty Logo**
-  // const anaBeautyLogoPath = path.join(__dirname, 'ana_beauty_logo.png'); // Ensure the logo file is in the same directory
-  // doc.image(anaBeautyLogoPath, 450, 20, { fit: [100, 100], align: 'right', valign: 'top' });
-
   // Header
-  doc.moveDown(3);
   doc.font('Helvetica-Bold').fontSize(20).text('VENTURE FUTURE', { align: 'center' });
   doc.font('Helvetica').fontSize(10).text('No 619/2801/1182, Mattiga Complex, Police Station Road', { align: 'center' });
   doc.text('Kasaba Hobali, Tirthahalli, Shivamogga, Karnataka - 577432', { align: 'center' });
@@ -83,12 +74,11 @@ export const generateInvoice = (order, user) => {
   const headers = ['DESCRIPTION', 'PRICE', 'DISCOUNT', 'QUANTITY', 'TOTAL INCL. GST'];
   const headerWidths = [180, 60, 80, 90, 110];
   const headerY = doc.y;
-  // **Modified: Added background color to headers**
   addTableRow(doc, headerY, headers, headerWidths, ['left', 'right', 'right', 'right', 'right'], '#f2f2f2'); // Light gray background
   doc.moveTo(40, headerY + 15).lineTo(570, headerY + 15).stroke(); // Adjusted line position for reduced left margin
 
   // Table Rows
-  order.items.forEach((item, index) => {
+  order.items.forEach((item) => {
     const rowY = doc.y + 5;
     const cols = [
       `${item.name}`,
