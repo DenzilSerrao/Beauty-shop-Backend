@@ -78,7 +78,7 @@ export const generateInvoice = (order, user) => {
   doc.moveTo(40, headerY + 15).lineTo(570, headerY + 15).stroke(); // Adjusted line position for reduced left margin
 
   // Table Rows
-  order.items.forEach((item) => {
+  order.items.forEach((item, index) => {
     const rowY = doc.y + 5;
     const cols = [
       `${item.name}`,
