@@ -13,28 +13,38 @@ export const generateInvoice = (order, user) => {
 
   // Load and register the NotoSans-Regular font for the rupee symbol
   const fontPathNotoSans = path.join(__dirname, 'NotoSans-Regular.ttf'); // Ensure the font file is in the same directory
+  if (!fs.existsSync(fontPathNotoSans)) {
+    console.error(`Font file not found: ${fontPathNotoSans}`);
+    throw new Error('Failed to find NotoSans-Regular.ttf font file');
+  }
   doc.registerFont('NotoSans', fontPathNotoSans);
 
-  // Helper function to add a table row
   const addTableRow = (doc, y, cols, widths, alignments = [], backgroundColor = null) => {
+    // Draw the background color first (if provided)
     if (backgroundColor) {
-      doc.rect(40, y, 530, 15).fill(backgroundColor).fillOpacity(0.2).strokeOpacity(0);
+      doc.rect(38, y - 4, 530, 15) // Adjust height and y-position slightly for better alignment
+         .fillColor(backgroundColor)
+         .fill()
+         .fillColor('black'); // Reset color to black for text
     }
+  
+    // Render the text after drawing the background
     cols.forEach((col, index) => {
-      const x = 40 + widths.slice(0, index).reduce((a, b) => a + b, 0); // Adjusted x position for reduced left margin
+      const x = 40 + widths.slice(0, index).reduce((a, b) => a + b, 0);
       const textOptions = {
         width: widths[index],
         align: alignments[index] || 'left',
       };
-
+  
       // Check if the column contains the rupee symbol and switch fonts accordingly
       if (col.includes('₹')) {
-        doc.font('NotoSans').fontSize(12).text(col, x, y, textOptions);
+        doc.font('NotoSans').fontSize(12).text(col, x, y-5, textOptions);
       } else {
         doc.font('Helvetica').fontSize(12).text(col, x, y, textOptions);
       }
     });
   };
+  
 
   // Helper function to format date as DD/MM/YYYY
   const formatDate = (date) => {
@@ -44,7 +54,24 @@ export const generateInvoice = (order, user) => {
     return `${day}/${month}/${year}`;
   };
 
+  // **Added: Add Venture Future Logo**
+  // const ventureFutureLogoPath = path.join(__dirname, 'venture_future_logo.jpeg'); // Ensure the logo file is in the same directory
+  // if (!fs.existsSync(ventureFutureLogoPath)) {
+  //   console.error(`Logo file not found: ${ventureFutureLogoPath}`);
+  //   throw new Error('Failed to find venture_future_logo.jpeg logo file');
+  // }
+  // doc.image(ventureFutureLogoPath, 40, 20, { fit: [100, 100], align: 'left', valign: 'top' });
+
+  // // **Added: Add Ana Beauty Logo**
+  // const anaBeautyLogoPath = path.join(__dirname, 'ana_beauty_logo.png'); // Ensure the logo file is in the same directory
+  // if (!fs.existsSync(anaBeautyLogoPath)) {
+  //   console.error(`Logo file not found: ${anaBeautyLogoPath}`);
+  //   throw new Error('Failed to find ana_beauty_logo.png logo file');
+  // }
+  // doc.image(anaBeautyLogoPath, 450, 35, { fit: [100, 100], align: 'right', valign: 'top' });
+
   // Header
+  doc.moveDown(3);
   doc.font('Helvetica-Bold').fontSize(20).text('VENTURE FUTURE', { align: 'center' });
   doc.font('Helvetica').fontSize(10).text('No 619/2801/1182, Mattiga Complex, Police Station Road', { align: 'center' });
   doc.text('Kasaba Hobali, Tirthahalli, Shivamogga, Karnataka - 577432', { align: 'center' });
@@ -71,9 +98,10 @@ export const generateInvoice = (order, user) => {
   doc.moveDown(2);
 
   // Table Headers
-  const headers = ['DESCRIPTION', 'PRICE', 'DISCOUNT', 'QUANTITY', 'TOTAL INCL. GST'];
+  const headers = ['DESCRIPTION', 'PRICE', 'SALE PRICE', 'QUANTITY', 'TOTAL INCL. GST'];
   const headerWidths = [180, 60, 80, 90, 110];
   const headerY = doc.y;
+  // **Modified: Added background color to headers**
   addTableRow(doc, headerY, headers, headerWidths, ['left', 'right', 'right', 'right', 'right'], '#f2f2f2'); // Light gray background
   doc.moveTo(40, headerY + 15).lineTo(570, headerY + 15).stroke(); // Adjusted line position for reduced left margin
 
@@ -82,8 +110,8 @@ export const generateInvoice = (order, user) => {
     const rowY = doc.y + 5;
     const cols = [
       `${item.name}`,
+      `₹${(item.price || 0).toFixed(2)}`,
       `₹${(item.salePrice || 0).toFixed(2)}`,
-      `₹${((item.price || 0) - (item.salePrice || 0)).toFixed(2)}`,
       `${(item.quantity || 0).toFixed(2)}`,
       `₹${((item.salePrice || 0) * (item.quantity || 0)).toFixed(2)}`,
     ];
