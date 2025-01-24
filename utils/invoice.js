@@ -9,15 +9,10 @@ const __dirname = path.dirname(__filename);
 
 export const generateInvoice = (order, user) => {
   console.log('Generating invoice for order:', order, 'user:', user);
-
   const doc = new PDFDocument({ size: 'A4', margin: 40 }); // Globally reduced left margin
 
   // Load and register the NotoSans-Regular font for the rupee symbol
   const fontPathNotoSans = path.join(__dirname, 'NotoSans-Regular.ttf'); // Ensure the font file is in the same directory
-  if (!fs.existsSync(fontPathNotoSans)) {
-    console.error(`Font file not found: ${fontPathNotoSans}`);
-    throw new Error('Failed to find NotoSans-Regular.ttf font file');
-  }
   doc.registerFont('NotoSans', fontPathNotoSans);
 
   // Helper function to add a table row
@@ -49,23 +44,15 @@ export const generateInvoice = (order, user) => {
     return `${day}/${month}/${year}`;
   };
 
-  // // Add Venture Future Logo
-  // const ventureFutureLogoPath = path.join(__dirname, 'venture_future_logo.jpeg'); // Ensure the logo file is in the same directory
-  // if (!fs.existsSync(ventureFutureLogoPath)) {
-  //   console.error(`Logo file not found: ${ventureFutureLogoPath}`);
-  //   throw new Error('Failed to find venture_future_logo.jpeg logo file');
-  // }
-  // doc.image(ventureFutureLogoPath, 40, 20, { fit: [100, 100], align: 'left', valign: 'top' });
+  // **Added: Add Venture Future Logo**
+  const ventureFutureLogoPath = path.join(__dirname, 'venture_future_logo.jpeg'); // Ensure the logo file is in the same directory
+  doc.image(ventureFutureLogoPath, 40, 20, { fit: [100, 100], align: 'left', valign: 'top' });
 
-  // // Add Ana Beauty Logo
-  // const anaBeautyLogoPath = path.join(__dirname, 'ana_beauty_logo.png'); // Ensure the logo file is in the same directory
-  // if (!fs.existsSync(anaBeautyLogoPath)) {
-  //   console.error(`Logo file not found: ${anaBeautyLogoPath}`);
-  //   throw new Error('Failed to find ana_beauty_logo.png logo file');
-  // }
-  // doc.image(anaBeautyLogoPath, 450, 20, { fit: [100, 100], align: 'right', valign: 'top' });
+  // **Added: Add Ana Beauty Logo**
+  const anaBeautyLogoPath = path.join(__dirname, 'ana_beauty_logo.png'); // Ensure the logo file is in the same directory
+  doc.image(anaBeautyLogoPath, 450, 20, { fit: [100, 100], align: 'right', valign: 'top' });
 
-  // Header Text
+  // Header
   doc.moveDown(3);
   doc.font('Helvetica-Bold').fontSize(20).text('VENTURE FUTURE', { align: 'center' });
   doc.font('Helvetica').fontSize(10).text('No 619/2801/1182, Mattiga Complex, Police Station Road', { align: 'center' });
@@ -96,6 +83,7 @@ export const generateInvoice = (order, user) => {
   const headers = ['DESCRIPTION', 'PRICE', 'DISCOUNT', 'QUANTITY', 'TOTAL INCL. GST'];
   const headerWidths = [180, 60, 80, 90, 110];
   const headerY = doc.y;
+  // **Modified: Added background color to headers**
   addTableRow(doc, headerY, headers, headerWidths, ['left', 'right', 'right', 'right', 'right'], '#f2f2f2'); // Light gray background
   doc.moveTo(40, headerY + 15).lineTo(570, headerY + 15).stroke(); // Adjusted line position for reduced left margin
 
@@ -109,6 +97,7 @@ export const generateInvoice = (order, user) => {
       `${(item.quantity || 0).toFixed(2)}`,
       `₹${((item.salePrice || 0) * (item.quantity || 0)).toFixed(2)}`,
     ];
+    // **Modified: Added alternating row colors**
     const backgroundColor = index % 2 === 0 ? '#ffffff' : '#f9f9f9'; // Alternating row colors
     addTableRow(doc, rowY, cols, headerWidths, ['left', 'right', 'right', 'right', 'right'], backgroundColor);
   });
@@ -127,15 +116,5 @@ export const generateInvoice = (order, user) => {
   doc.moveDown(2);
   doc.font('Helvetica').fontSize(12).text('Thank you for shopping with ANA Beauty!', { align: 'center' });
 
-  // // Capture the PDF data
-  // const buffers = [];
-  // doc.on('data', (chunk) => buffers.push(chunk));
-  // doc.on('end', () => {
-  //   const pdfData = Buffer.concat(buffers);
-  //   resolve(pdfData);
-  // });
-
-  // // Finalize the PDF and close the document
-  // doc.end();
   return doc;
 };
