@@ -7,15 +7,16 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-export const generateInvoice = (order, user) => {
+export const generateOrderInvoice = (order, user, res) => {
   console.log('Generating invoice for order:', order, 'user:', user);
+
   const doc = new PDFDocument({ size: 'A4', margin: 40 }); // Globally reduced left margin
 
   // Load and register the NotoSans-Regular font for the rupee symbol
   const fontPathNotoSans = path.join(__dirname, 'NotoSans-Regular.ttf'); // Ensure the font file is in the same directory
   if (!fs.existsSync(fontPathNotoSans)) {
     console.error(`Font file not found: ${fontPathNotoSans}`);
-    return null;
+    return res.status(500).json({ message: 'Failed to generate invoice' });
   }
   doc.registerFont('NotoSans', fontPathNotoSans);
 
@@ -49,10 +50,10 @@ export const generateInvoice = (order, user) => {
   };
 
   // Add Venture Future Logo
-  const ventureFutureLogoPath = path.join(__dirname, 'venture_future_logo.jpeg'); // Ensure the logo file is in the same directory
+  const ventureFutureLogoPath = path.join(__dirname, 'venture_future_logo.jpg'); // Ensure the logo file is in the same directory
   if (!fs.existsSync(ventureFutureLogoPath)) {
     console.error(`Logo file not found: ${ventureFutureLogoPath}`);
-    return null;
+    return res.status(500).json({ message: 'Failed to generate invoice' });
   }
   doc.image(ventureFutureLogoPath, 40, 20, { fit: [100, 100], align: 'left', valign: 'top' });
 
@@ -60,9 +61,9 @@ export const generateInvoice = (order, user) => {
   const anaBeautyLogoPath = path.join(__dirname, 'ana_beauty_logo.png'); // Ensure the logo file is in the same directory
   if (!fs.existsSync(anaBeautyLogoPath)) {
     console.error(`Logo file not found: ${anaBeautyLogoPath}`);
-    return null;
+    return res.status(500).json({ message: 'Failed to generate invoice' });
   }
-  doc.image(anaBeautyLogoPath, 450, 20, { fit: [100, 100], align: 'right', valign: 'top' });
+  doc.image(anaBeautyLogoPath, 450, 35, { fit: [100, 100], align: 'right', valign: 'top' });
 
   // Header Text
   doc.moveDown(3);
@@ -125,17 +126,6 @@ export const generateInvoice = (order, user) => {
   // Footer
   doc.moveDown(2);
   doc.font('Helvetica').fontSize(12).text('Thank you for shopping with ANA Beauty!', { align: 'center' });
-
-  return doc;
-};
-
-// Example usage to generate and send the PDF as a binary response
-export const sendInvoice = (res, order, user) => {
-  const doc = generateInvoice(order, user);
-  if (!doc) {
-    res.status(500).send('Failed to generate invoice');
-    return;
-  }
 
   // Set the response headers
   res.setHeader('Content-Type', 'application/pdf');
