@@ -3,7 +3,7 @@ import { Order } from '../models/order.js';
 import { User } from '../models/user.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { NotFoundError, ValidationError } from '../utils/errors.js';
-import generateInvoice from '../utils/invoice.js';
+import { generateInvoice } from '../utils/invoice.js';
 import mongoose from 'mongoose';
 
 export const getOrders = asyncHandler(async (req, res) => {
