@@ -45,12 +45,14 @@ export const generateInvoice = (order, user) => {
   };
 
   // Add Venture Future Logo
-  const ventureFutureLogoPath = path.join(__dirname, 'future_venture_logo.jpg'); // Ensure the logo file is in the same directory
+  const ventureFutureLogoPath = path.join(__dirname, 'venture_future_logo.jpeg'); // Ensure the logo file is in the same directory
+  // const ventureFutureLogoPath = path.join(__dirname, 'test1.png'); // Ensure the logo file is in the same directory
   doc.image(ventureFutureLogoPath, 40, 20, { fit: [100, 100], align: 'left', valign: 'top' });
 
   // Add Ana Beauty Logo
   const anaBeautyLogoPath = path.join(__dirname, 'ana_beauty_logo.png'); // Ensure the logo file is in the same directory
-  doc.image(anaBeautyLogoPath, 450, 20, { fit: [100, 100], align: 'right', valign: 'top' });
+  // const anaBeautyLogoPath = path.join(__dirname, 'test2.png'); // Ensure the logo file is in the same directory
+  doc.image(anaBeautyLogoPath, 450, 35, { fit: [100, 100], align: 'right', valign: 'top' });
 
   // Header Text
   doc.moveDown(3);
@@ -117,7 +119,7 @@ export const generateInvoice = (order, user) => {
   return doc;
 };
 
-// Example usage to save the PDF to a file
+// // Example usage to save the PDF to a file
 // const order = {
 //   _id: 'INV12345',
 //   createdAt: new Date(),
@@ -127,7 +129,7 @@ export const generateInvoice = (order, user) => {
 //     { name: 'Product B', salePrice: 15.00, price: 18.00, quantity: 1 },
 //   ],
 // };
-// // Test user data
+
 // const user = {
 //   name: 'John Doe',
 //   email: 'john.doe@example.com',
@@ -137,11 +139,19 @@ export const generateInvoice = (order, user) => {
 
 // const filePath = path.join(__dirname, 'invoice.pdf');
 // const writeStream = fs.createWriteStream(filePath);
+
+// // Pipe the PDF document to the write stream
 // const doc = generateInvoice(order, user);
 // doc.pipe(writeStream);
 
+// // Finalize the PDF and close the write stream
+// doc.end();
+
+// // Handle events on the write stream
 // writeStream.on('finish', () => {
 //   console.log(`Invoice saved to ${filePath}`);
 // });
 
-// doc.end();
+// writeStream.on('error', (err) => {
+//   console.error('Error writing PDF:', err);
+// });

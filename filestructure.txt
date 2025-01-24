@@ -1,0 +1,84 @@
+|-- .env
+|-- .gitignore
+|-- .vercel
+    |-- project.json
+    |-- README.txt
+|-- api
+    |-- admin
+        |-- allOrders
+            |-- index.js
+        |-- orders
+            |-- [orderId]
+                |-- index.js
+    |-- auth
+        |-- login
+            |-- index.js
+        |-- register
+            |-- index.js
+        |-- verify
+            |-- index.js
+    |-- orders
+        |-- index.js
+        |-- [orderId]
+            |-- index.js
+            |-- invoice
+                |-- index.js
+    |-- payment
+        |-- create-order
+            |-- index.js
+        |-- verify-payment
+            |-- index.js
+    |-- products
+        |-- index.js
+|-- config
+    |-- database.js
+    |-- razorpay.js
+    |-- server.js
+|-- controllers
+    |-- adminController.js
+    |-- auth.controller.js
+    |-- auth.js
+    |-- orders.js
+    |-- payments.js
+    |-- products.js
+|-- lib
+    |-- db.js
+|-- middleware
+    |-- auth.js
+    |-- corsMiddleware.js
+    |-- isAdminAuth.js
+    |-- userAuth.js
+|-- models
+    |-- order.js
+    |-- payment.js
+    |-- product.js
+    |-- user.js
+|-- package-lock.json
+|-- package.json
+|-- public
+    |-- products
+|-- README.md
+|-- routes
+    |-- adminRoutes.js
+    |-- auth.js
+    |-- auth.routes.js
+    |-- orders.js
+    |-- payment.js
+    |-- products.js
+|-- services
+    |-- auth.service.js
+|-- src
+    |-- server.js
+    |-- types
+        |-- index.ts
+|-- tsconfig.json
+|-- utils
+    |-- ana_beauty_logo.png
+    |-- asyncHandler.js
+    |-- constants.js
+    |-- errors.js
+    |-- invoice.js
+    |-- logger.js
+    |-- NotoSans-Regular.ttf
+    |-- venture_future_logo.jpeg
+|-- vercel.json
