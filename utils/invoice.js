@@ -16,7 +16,10 @@ export const generateInvoice = (order, user) => {
   doc.registerFont('NotoSans', fontPathNotoSans);
 
   // Helper function to add a table row
-  const addTableRow = (doc, y, cols, widths, alignments = []) => {
+  const addTableRow = (doc, y, cols, widths, alignments = [], backgroundColor = null) => {
+    if (backgroundColor) {
+      doc.rect(40, y, 530, 15).fill(backgroundColor).fillOpacity(0.2).strokeOpacity(0);
+    }
     cols.forEach((col, index) => {
       const x = 40 + widths.slice(0, index).reduce((a, b) => a + b, 0); // Adjusted x position for reduced left margin
       const textOptions = {
@@ -41,7 +44,16 @@ export const generateInvoice = (order, user) => {
     return `${day}/${month}/${year}`;
   };
 
-  // Header
+  // Add Venture Future Logo
+  const ventureFutureLogoPath = path.join(__dirname, 'future_venture_logo.jpg'); // Ensure the logo file is in the same directory
+  doc.image(ventureFutureLogoPath, 40, 20, { fit: [100, 100], align: 'left', valign: 'top' });
+
+  // Add Ana Beauty Logo
+  const anaBeautyLogoPath = path.join(__dirname, 'ana_beauty_logo.png'); // Ensure the logo file is in the same directory
+  doc.image(anaBeautyLogoPath, 450, 20, { fit: [100, 100], align: 'right', valign: 'top' });
+
+  // Header Text
+  doc.moveDown(3);
   doc.font('Helvetica-Bold').fontSize(20).text('VENTURE FUTURE', { align: 'center' });
   doc.font('Helvetica').fontSize(10).text('No 619/2801/1182, Mattiga Complex, Police Station Road', { align: 'center' });
   doc.text('Kasaba Hobali, Tirthahalli, Shivamogga, Karnataka - 577432', { align: 'center' });
@@ -71,11 +83,11 @@ export const generateInvoice = (order, user) => {
   const headers = ['DESCRIPTION', 'PRICE', 'DISCOUNT', 'QUANTITY', 'TOTAL INCL. GST'];
   const headerWidths = [180, 60, 80, 90, 110];
   const headerY = doc.y;
-  addTableRow(doc, headerY, headers, headerWidths, ['left', 'right', 'right', 'right', 'right']);
+  addTableRow(doc, headerY, headers, headerWidths, ['left', 'right', 'right', 'right', 'right'], '#f2f2f2'); // Light gray background
   doc.moveTo(40, headerY + 15).lineTo(570, headerY + 15).stroke(); // Adjusted line position for reduced left margin
 
   // Table Rows
-  order.items.forEach((item) => {
+  order.items.forEach((item, index) => {
     const rowY = doc.y + 5;
     const cols = [
       `${item.name}`,
@@ -84,7 +96,8 @@ export const generateInvoice = (order, user) => {
       `${(item.quantity || 0).toFixed(2)}`,
       `₹${((item.salePrice || 0) * (item.quantity || 0)).toFixed(2)}`,
     ];
-    addTableRow(doc, rowY, cols, headerWidths, ['left', 'right', 'right', 'right', 'right']);
+    const backgroundColor = index % 2 === 0 ? '#ffffff' : '#f9f9f9'; // Alternating row colors
+    addTableRow(doc, rowY, cols, headerWidths, ['left', 'right', 'right', 'right', 'right'], backgroundColor);
   });
 
   // Totals
@@ -103,3 +116,32 @@ export const generateInvoice = (order, user) => {
 
   return doc;
 };
+
+// Example usage to save the PDF to a file
+// const order = {
+//   _id: 'INV12345',
+//   createdAt: new Date(),
+//   total: 37.45,
+//   items: [
+//     { name: 'Product A', salePrice: 10.00, price: 12.00, quantity: 2 },
+//     { name: 'Product B', salePrice: 15.00, price: 18.00, quantity: 1 },
+//   ],
+// };
+// // Test user data
+// const user = {
+//   name: 'John Doe',
+//   email: 'john.doe@example.com',
+//   customerPhone: '1234567890',
+//   shippingAddress: '123 Main St, Anytown, Anystate, 12345',
+// };
+
+// const filePath = path.join(__dirname, 'invoice.pdf');
+// const writeStream = fs.createWriteStream(filePath);
+// const doc = generateInvoice(order, user);
+// doc.pipe(writeStream);
+
+// writeStream.on('finish', () => {
+//   console.log(`Invoice saved to ${filePath}`);
+// });
+
+// doc.end();
