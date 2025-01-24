@@ -85,10 +85,6 @@ export const deleteOrder = asyncHandler(async (orderId, res) => {
     if (!order) {
       return res.status(404).json({ status: 'fail', message: 'Order not found' });
     }
-
-    res.status(200).json({
-      status: 'success'
-    });
   } catch (error) {
     console.error('Error deleting order:', error);
     throw new Error('Failed to delete order');
