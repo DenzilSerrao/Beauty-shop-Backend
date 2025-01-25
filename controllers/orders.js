@@ -33,26 +33,37 @@ export const getOrders = asyncHandler(async (req, res) => {
 
     // Extract product names from order items
     const productNames = new Set(
-      orders.flatMap(order => order.items.map(item => item.name))
+      orders.flatMap(order => order.items.map(item => item.name.trim()))
     );
+
+    console.log('Product Names to Fetch:', Array.from(productNames));
 
     // Query the Product collection to get product details based on names
     const products = await Product.find({ name: { $in: Array.from(productNames) } }).exec();
-    console.log('Products query executed:', products);
+
+    console.log('Fetched Products:', products);
+
     // Create a map for quick lookup of product details by name
-    const productMap = new Map(products.map(product => [product.name, product]));
+    const productMap = new Map(products.map(product => [product.name.trim(), product]));
+
+    console.log('Product Map:', productMap);
 
     // Attach image1 path to each order item
     const enrichedOrders = orders.map(order => ({
       ...order.toObject(),
-      items: order.items.map(item => ({
-        ...item.toObject(),
-        image1: productMap.get(item.name)?.image1 || null
-      }))
-
+      items: order.items.map(item => {
+        const product = productMap.get(item.name.trim());
+        if (!product) {
+          console.warn(`Product not found for item name: ${item.name}`);
+        }
+        return {
+          ...item.toObject(),
+          image1: product?.image1 || null
+        };
+      })
     }));
-    console.log('Enriched orders:', enrichedOrders);
-    console.log('Orders fetched and enriched successfully');
+
+    console.log('Orders fetched and enriched successfully:', enrichedOrders);
 
     return res.status(200).json({
       status: 'success',
