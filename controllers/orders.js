@@ -1,6 +1,7 @@
 import { connectDB } from '../lib/db.js'; // Import the connectDB function
 import { Order } from '../models/order.js';
 import { User } from '../models/user.js';
+import { Product } from '../models/product.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { NotFoundError, ValidationError } from '../utils/errors.js';
 import { generateInvoice } from '../utils/invoice.js';
@@ -20,7 +21,7 @@ export const getOrders = asyncHandler(async (req, res) => {
 
     console.log('Fetching orders from:', userId);
 
-    // Execute the query
+    // Execute the query to get orders for the user
     const orders = await Order.findByUser(userId).exec();
 
     console.log('Orders query executed:', orders);
@@ -30,11 +31,32 @@ export const getOrders = asyncHandler(async (req, res) => {
       return res.status(404).json({ status: 'fail', message: 'No orders found for this user' });
     }
 
-    console.log('Orders fetched successfully');
+    // Extract product names from order items
+    const productNames = new Set(
+      orders.flatMap(order => order.items.map(item => item.name))
+    );
+
+    // Query the Product collection to get product details based on names
+    const products = await Product.find({ name: { $in: Array.from(productNames) } }).exec();
+    console.log('Products query executed:', products);
+    // Create a map for quick lookup of product details by name
+    const productMap = new Map(products.map(product => [product.name, product]));
+
+    // Attach image1 path to each order item
+    const enrichedOrders = orders.map(order => ({
+      ...order.toObject(),
+      items: order.items.map(item => ({
+        ...item.toObject(),
+        image1: productMap.get(item.name)?.image1 || null
+      }))
+
+    }));
+    console.log('Enriched orders:', enrichedOrders);
+    console.log('Orders fetched and enriched successfully');
 
     return res.status(200).json({
       status: 'success',
-      data: { orders },
+      data: { orders: enrichedOrders },
     });
   } catch (error) {
     console.error('Error fetching user orders:', error);
