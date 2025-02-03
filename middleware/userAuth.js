@@ -17,7 +17,7 @@ export default async function userAuth(req, res) {
 
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      console.log('decoded token:', decoded)
+      console.log('decoded token')
       const user = await User.findById(decoded.userId);
 
       if (!user) {
@@ -25,7 +25,7 @@ export default async function userAuth(req, res) {
         return { error: 'User not found' };
       }
       const orders = await Order.findByUser(decoded.userId).exec();
-      console.log('Orders:', orders);
+      console.log('Orders extracted');
       req.user = user;
       console.log('User authenticated successfully:', user.id);
       return { success: true };
