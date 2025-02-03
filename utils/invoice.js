@@ -72,7 +72,7 @@ export const generateInvoice = (order, user) => {
 
   // Header
   doc.moveDown(3);
-  doc.font('Helvetica-Bold').fontSize(20).text('VENTURE FUTURE', { align: 'center' });
+  doc.font('Helvetica-Bold').fontSize(20).text('ANA BEAUTY', { align: 'center' });
   doc.font('Helvetica').fontSize(10).text('No 619/2801/1182, Mattiga Complex, Police Station Road', { align: 'center' });
   doc.text('Kasaba Hobali, Tirthahalli, Shivamogga, Karnataka - 577432', { align: 'center' });
   doc.text('GST Reg #: 29HTXPS1735K1ZJ', { align: 'center' });
