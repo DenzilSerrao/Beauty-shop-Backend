@@ -92,7 +92,7 @@ export default async function handler(req, res) {
           <p>We appreciate your business!</p>
         `;
         console.log('Sending email to customer:', customerEmailBody);
-        // await sendEmail(order.userId.email, 'Order Confirmation', '', customerEmailBody);
+        await sendEmail(order.userId.email, 'Order Confirmation', '', customerEmailBody);
 
         // Send email to owner
         const ownerEmailBody = `
@@ -104,7 +104,7 @@ export default async function handler(req, res) {
           <ul>${orderItems}</ul>
         `;
         console.log('Sending email to owner:', ownerEmailBody);
-        // await sendEmail(process.env.OWNER_EMAIL, 'New Order Received', '', ownerEmailBody);
+        await sendEmail(process.env.OWNER_EMAIL, 'New Order Received', '', ownerEmailBody);
 
         res.json({ success: true });
       } else {
