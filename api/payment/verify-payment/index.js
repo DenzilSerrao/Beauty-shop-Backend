@@ -4,7 +4,7 @@ import { connectDB } from '../../../lib/db.js';
 import { razorpay } from '../../../config/razorpay.js';
 import { Order } from '../../../models/order.js';
 import { Payment } from '../../../models/payment.js';
-import { sendEmail } from '../../../utils/emailService.js';
+import { sendEmail } from '../../../services/email.service.js';
 import crypto from 'crypto';
 
 export default async function handler(req, res) {
