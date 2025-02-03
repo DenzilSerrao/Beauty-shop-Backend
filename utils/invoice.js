@@ -63,7 +63,7 @@ export const generateInvoice = (order, user) => {
   // doc.image(ventureFutureLogoPath, 40, 20, { fit: [100, 100], align: 'left', valign: 'top' });
 
   // **Added: Add Ana Beauty Logo**
-  const anaBeautyLogoPath = path.join(__dirname, 'ana_beauty_logo1.png'); // Ensure the logo file is in the same directory
+  const anaBeautyLogoPath = path.join(__dirname, 'ana_beauty_logo.png'); // Ensure the logo file is in the same directory
   if (!fs.existsSync(anaBeautyLogoPath)) {
     console.error(`Logo file not found: ${anaBeautyLogoPath}`);
     throw new Error('Failed to find ana_beauty_logo.png logo file');
