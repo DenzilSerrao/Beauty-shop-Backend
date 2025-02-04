@@ -31,12 +31,13 @@ export default async function handler(req, res) {
       const signature = req.headers['x-razorpay-signature'];
       const body = JSON.stringify(req.body);
       console.log('Webhook signature:', signature);
+      console.log('Webhook payload:', body);
       // Validate webhook signature
       const expectedSignature = crypto
         .createHmac('sha256', webhookSecret)
         .update(body)
         .digest('hex');
-      console.log('Webhook payload:', body);
+
       if (signature !== expectedSignature) {
         console.error('Invalid webhook signature');
         return res.status(400).json({ error: 'Invalid webhook signature' });
@@ -55,6 +56,13 @@ export default async function handler(req, res) {
         const razorpayPaymentId = payload.payment.entity.id;
         const amount = payload.payment.entity.amount / 100; // Convert from paise to INR
         const { orderId, userId } = payload.payment.entity.notes;
+
+        // Check if payment already processed
+        const existingPayment = await Payment.findOne({ razorpayPaymentId });
+        if (existingPayment) {
+          console.log('Payment already processed');
+          return res.status(200).json({ success: true });
+        }
 
         // Find order by Razorpay Order ID
         const order = await Order.findOne({ _id: orderId }).populate('userId');
