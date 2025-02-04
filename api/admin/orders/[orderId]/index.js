@@ -35,23 +35,20 @@ export default async function handler(req, res) {
     switch (req.method) {
       case 'GET':
         console.log('Handling GET request for order:', orderId);
-        const order = await AdmingetOrder(orderId, req, res);
+        const order = await AdmingetOrder(req, res);
         console.log('Order fetched successfully:', order);
-        res.status(200).json(order);
         break;
 
       case 'DELETE':
         console.log('Handling DELETE request for order:', orderId);
-        await AdmindeleteOrder(orderId, req, res);
+        await AdmindeleteOrder(req, res);
         console.log('Order deleted successfully');
-        res.status(200).json({ success: true, message: 'Order deleted successfully' });
         break;
 
       case 'PATCH':
         console.log('Handling PATCH request for order:', orderId);
-        const updatedOrder = await updateOrderStatus(orderId, req, res);
-        console.log('Order status updated successfully:', updatedOrder);
-        res.status(200).json(updatedOrder);
+        await updateOrderStatus(req, res);
+        console.log('Order status updated successfully');
         break;
 
       default:
