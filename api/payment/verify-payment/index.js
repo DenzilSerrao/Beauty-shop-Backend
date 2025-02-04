@@ -42,7 +42,7 @@ export default async function handler(req, res) {
       }
 
       console.log('Webhook signature verified');
-
+      console.log('Webhook payload:', body);
       // Extract event data from webhook payload
       const event = req.body.event;
       const payload = req.body.payload;
