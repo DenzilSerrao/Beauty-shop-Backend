@@ -2,6 +2,7 @@ import { corsMiddleware } from '../../../middleware/corsMiddleware.js';
 import { connectDB } from '../../../lib/db.js';
 import { Order } from '../../../models/order.js';
 import { Payment } from '../../../models/payment.js';
+import { User } from '../../../models/user.js'; // Import the User model
 import { sendEmail } from '../../../services/email.service.js';
 import crypto from 'crypto';
 
