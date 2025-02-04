@@ -2,7 +2,6 @@ import { AdmingetOrder, AdmindeleteOrder, updateOrderStatus } from '../../../../
 import { corsMiddleware } from '../../../../middleware/corsMiddleware.js';
 import isAdminAuth from '../../../../middleware/isAdminAuth.js';
 import { connectDB } from '../../../../lib/db.js';
-import { deleteOrder } from '../../../../controllers/orders.js';
 
 export default async function handler(req, res) {
   // Apply CORS middleware
@@ -42,7 +41,7 @@ export default async function handler(req, res) {
 
       case 'DELETE':
         console.log('Handling DELETE request for order:', orderId);
-        await deleteOrder(req, res);
+        await AdmindeleteOrder(req, res);
         console.log('Order deleted successfully');
         break;
 
