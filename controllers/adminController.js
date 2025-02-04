@@ -1,11 +1,9 @@
 import { connectDB } from '../lib/db.js'; // Import the connectDB function
 import { Order } from '../models/order.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
+import mongoose from 'mongoose';
 
 export const getAllOrders = asyncHandler(async (req, res) => {
-  // Ensure database connection is established before proceeding
-  await connectDB();
-
   try {
     const processingAndShippingOrders = await Order.find({
       $or: [{ status: 'processing' }, { status: 'shipped' }]
@@ -24,16 +22,17 @@ export const getAllOrders = asyncHandler(async (req, res) => {
     });
   } catch (error) {
     console.error('Error fetching orders:', error);
-    throw new Error('Failed to fetch orders');
+    res.status(500).json({ status: 'fail', message: 'Failed to fetch orders' });
   }
 });
 
-export const AdmingetOrder = asyncHandler(async (req, res) => {
-  // Ensure database connection is established before proceeding
-  await connectDB();
-
+export const AdmingetOrder = asyncHandler(async (orderId, req, res) => {
   try {
-    const { orderId } = req.query;
+    // Validate orderId
+    if (!mongoose.Types.ObjectId.isValid(orderId)) {
+      return res.status(400).json({ status: 'fail', message: 'Invalid order ID' });
+    }
+
     const order = await Order.findById(orderId).populate('userId', 'name email');
 
     if (!order) {
@@ -46,16 +45,17 @@ export const AdmingetOrder = asyncHandler(async (req, res) => {
     });
   } catch (error) {
     console.error('Error fetching order:', error);
-    throw new Error('Failed to fetch order');
+    res.status(500).json({ status: 'fail', message: 'Failed to fetch order' });
   }
 });
 
-export const AdmindeleteOrder = asyncHandler(async (req, res) => {
-  // Ensure database connection is established before proceeding
-  await connectDB();
-
+export const AdmindeleteOrder = asyncHandler(async (orderId, req, res) => {
   try {
-    const { orderId } = req.query;
+    // Validate orderId
+    if (!mongoose.Types.ObjectId.isValid(orderId)) {
+      return res.status(400).json({ status: 'fail', message: 'Invalid order ID' });
+    }
+
     const order = await Order.findByIdAndDelete(orderId);
 
     if (!order) {
@@ -68,31 +68,38 @@ export const AdmindeleteOrder = asyncHandler(async (req, res) => {
     });
   } catch (error) {
     console.error('Error deleting order:', error);
-    throw new Error('Failed to delete order');
+    res.status(500).json({ status: 'fail', message: 'Failed to delete order' });
   }
 });
 
-export const updateOrderStatus = asyncHandler(async (req, res) => {
+export const updateOrderStatus = asyncHandler(async (orderId, req, res) => {
   // Ensure database connection is established before proceeding
   await connectDB();
 
   try {
-    const { orderId } = req.query;
     const { status } = req.body;
 
     if (!status) {
-      throw new Error('Status is required');
+      return res.status(400).json({ status: 'fail', message: 'Status is required' });
+    }
+
+    // Validate orderId
+    if (!mongoose.Types.ObjectId.isValid(orderId)) {
+      return res.status(400).json({ status: 'fail', message: 'Invalid order ID' });
     }
 
     const order = await Order.findByIdAndUpdate(orderId, { status }, { new: true });
 
     if (!order) {
-      return res.status(404).json({ message: 'Order not found' });
+      return res.status(404).json({ status: 'fail', message: 'Order not found' });
     }
 
-    res.status(200).json(order);
+    res.status(200).json({
+      status: 'success',
+      data: { order }
+    });
   } catch (error) {
     console.error('Error updating order status:', error);
-    throw new Error('Failed to update order status');
+    res.status(500).json({ status: 'fail', message: 'Failed to update order status' });
   }
 });
