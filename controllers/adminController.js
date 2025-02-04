@@ -28,6 +28,7 @@ export const getAllOrders = asyncHandler(async (req, res) => {
 
 export const AdmingetOrder = asyncHandler(async (orderId, req, res) => {
   try {
+    console.log('Fetching order:', orderId);
     // Validate orderId
     if (!mongoose.Types.ObjectId.isValid(orderId)) {
       return res.status(400).json({ status: 'fail', message: 'Invalid order ID' });
@@ -51,6 +52,7 @@ export const AdmingetOrder = asyncHandler(async (orderId, req, res) => {
 
 export const AdmindeleteOrder = asyncHandler(async (orderId, req, res) => {
   try {
+    console.log('Deleting order:', orderId);
     // Validate orderId
     if (!mongoose.Types.ObjectId.isValid(orderId)) {
       return res.status(400).json({ status: 'fail', message: 'Invalid order ID' });
@@ -73,9 +75,9 @@ export const AdmindeleteOrder = asyncHandler(async (orderId, req, res) => {
 });
 
 export const updateOrderStatus = asyncHandler(async (orderId, req, res) => {
-  // Ensure database connection is established before proceeding
-  await connectDB();
-
+  // // Ensure database connection is established before proceeding
+  // await connectDB();
+  console.log('Updating order status:', orderId);
   try {
     const { status } = req.body;
 
