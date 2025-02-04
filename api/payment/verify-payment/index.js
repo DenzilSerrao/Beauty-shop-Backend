@@ -53,9 +53,10 @@ export default async function handler(req, res) {
         const razorpayOrderId = payload.payment.entity.order_id;
         const razorpayPaymentId = payload.payment.entity.id;
         const amount = payload.payment.entity.amount / 100; // Convert from paise to INR
+        const { orderId, userId } = payload.payment.entity.notes;
 
         // Find order by Razorpay Order ID
-        const order = await Order.findOne({ razorpayOrderId }).populate('userId');
+        const order = await Order.findOne({ _id: orderId }).populate('userId');
         if (!order || !order.userId) {
           console.error('Order or user not found');
           return res.status(404).json({ error: 'Order or user details not found' });
@@ -103,7 +104,7 @@ export default async function handler(req, res) {
         `;
         await sendEmail(process.env.OWNER_EMAIL, 'New Order Received', '', ownerEmailBody);
 
-        return res.status(200).json({ success: true });
+        return res.status(200).json({ success: true, orderId: order._id, amount });
       }
 
       console.log('Unhandled event type:', event);
