@@ -30,20 +30,20 @@ export default async function handler(req, res) {
       const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
       const signature = req.headers['x-razorpay-signature'];
       const body = JSON.stringify(req.body);
-
+      console.log('Webhook signature:', signature);
       // Validate webhook signature
       const expectedSignature = crypto
         .createHmac('sha256', webhookSecret)
         .update(body)
         .digest('hex');
-
+      console.log('Webhook payload:', body);
       if (signature !== expectedSignature) {
         console.error('Invalid webhook signature');
         return res.status(400).json({ error: 'Invalid webhook signature' });
       }
 
       console.log('Webhook signature verified');
-      console.log('Webhook payload:', body);
+
       // Extract event data from webhook payload
       const event = req.body.event;
       const payload = req.body.payload;
