@@ -44,7 +44,7 @@ export default async function handler(req, res) {
         console.log('Handling DELETE request for order:', orderId);
         await deleteOrder(orderId, req, res);
         console.log('Order deleted successfully');
-        res.status(204).end();
+        res.status(200).json({ success: true, message: 'Order deleted successfully' });
         break;
 
       default:
