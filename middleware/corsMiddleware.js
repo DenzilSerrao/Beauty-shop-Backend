@@ -9,7 +9,7 @@ const allowedOrigins = [
   'https://www.anabeauty.co.in',
   'https://anabeauty.co.in',
   'http://localhost:5173',
-  'https://beauty-shop-frontend-l8yf-iyz8b60tj-denzil-serraos-projects.vercel.app/ana-beauty/login',
+  'https://beauty-shop-frontend-l8yf-iyz8b60tj-denzil-serraos-projects.vercel.app',
 ];
 
 export const corsMiddleware = (req, res) => {
