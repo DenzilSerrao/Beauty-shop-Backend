@@ -61,7 +61,13 @@ export default async function handler(req, res) {
         currency: 'INR',
         receipt: order._id.toString(), // Use orderId as the receipt ID
         payment_capture: 1, // Auto-capture payment
+        notes: {
+          orderId: order._id.toString(),  // Store your database orderId
+          total: order.total.toString(),  // Store total amount
+          userId: userId,                 // (Optional) Store userId for reference
+        }
       };
+
 
       // Create Razorpay order
       const razorpayOrder = await razorpay.orders.create(options);

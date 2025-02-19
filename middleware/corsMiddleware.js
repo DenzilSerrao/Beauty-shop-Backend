@@ -8,7 +8,8 @@ const allowedOrigins = [
   'https://beauty-shop-frontend-l8yf.vercel.app',
   'https://www.anabeauty.co.in',
   'https://anabeauty.co.in',
-  'http://localhost:5173'
+  'http://localhost:5173',
+  'https://beauty-shop-frontend-l8yf-iyz8b60tj-denzil-serraos-projects.vercel.app',
 ];
 
 export const corsMiddleware = (req, res) => {
@@ -17,7 +18,7 @@ export const corsMiddleware = (req, res) => {
   if (origin && allowedOrigins.includes(origin)) {
     res.setHeader('Access-Control-Allow-Origin', origin);
   } else {
-    res.setHeader('Access-Control-Allow-Origin', ''); // No origin allowed
+    res.setHeader('Access-Control-Allow-Origin', origin); // No origin allowed
   }
 
   res.setHeader('Access-Control-Allow-Methods', corsHeaders['Access-Control-Allow-Methods']);

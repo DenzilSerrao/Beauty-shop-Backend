@@ -54,7 +54,7 @@ export const generateInvoice = (order, user) => {
     return `${day}/${month}/${year}`;
   };
 
-  // **Added: Add Venture Future Logo**
+  // // **Added: Add Venture Future Logo**
   // const ventureFutureLogoPath = path.join(__dirname, 'venture_future_logo.jpeg'); // Ensure the logo file is in the same directory
   // if (!fs.existsSync(ventureFutureLogoPath)) {
   //   console.error(`Logo file not found: ${ventureFutureLogoPath}`);
@@ -62,17 +62,17 @@ export const generateInvoice = (order, user) => {
   // }
   // doc.image(ventureFutureLogoPath, 40, 20, { fit: [100, 100], align: 'left', valign: 'top' });
 
-  // // **Added: Add Ana Beauty Logo**
-  // const anaBeautyLogoPath = path.join(__dirname, 'ana_beauty_logo.png'); // Ensure the logo file is in the same directory
-  // if (!fs.existsSync(anaBeautyLogoPath)) {
-  //   console.error(`Logo file not found: ${anaBeautyLogoPath}`);
-  //   throw new Error('Failed to find ana_beauty_logo.png logo file');
-  // }
-  // doc.image(anaBeautyLogoPath, 450, 35, { fit: [100, 100], align: 'right', valign: 'top' });
+  // **Added: Add Ana Beauty Logo**
+  const anaBeautyLogoPath = path.join(__dirname, 'ana_beauty_logo.png'); // Ensure the logo file is in the same directory
+  if (!fs.existsSync(anaBeautyLogoPath)) {
+    console.error(`Logo file not found: ${anaBeautyLogoPath}`);
+    throw new Error('Failed to find ana_beauty_logo.png logo file');
+  }
+  doc.image(anaBeautyLogoPath, 450, 35, { fit: [100, 100], align: 'right', valign: 'top' });
 
   // Header
   doc.moveDown(3);
-  doc.font('Helvetica-Bold').fontSize(20).text('VENTURE FUTURE', { align: 'center' });
+  doc.font('Helvetica-Bold').fontSize(20).text('ANA BEAUTY', { align: 'center' });
   doc.font('Helvetica').fontSize(10).text('No 619/2801/1182, Mattiga Complex, Police Station Road', { align: 'center' });
   doc.text('Kasaba Hobali, Tirthahalli, Shivamogga, Karnataka - 577432', { align: 'center' });
   doc.text('GST Reg #: 29HTXPS1735K1ZJ', { align: 'center' });

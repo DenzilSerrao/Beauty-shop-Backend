@@ -1,9 +1,9 @@
 import { corsMiddleware } from '../../../middleware/corsMiddleware.js';
-import userAuth from '../../../middleware/userAuth.js';
 import { connectDB } from '../../../lib/db.js';
-import { razorpay } from '../../../config/razorpay.js';
 import { Order } from '../../../models/order.js';
 import { Payment } from '../../../models/payment.js';
+import { User } from '../../../models/user.js'; // Import the User model
+import { sendEmail } from '../../../services/email.service.js';
 import crypto from 'crypto';
 
 export default async function handler(req, res) {
@@ -23,60 +23,107 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Failed to connect to the database' });
   }
 
-  // Verify user auth
-  const authResult = await userAuth(req, res);
-  if (authResult?.error) {
-    console.error('User authentication failed:', authResult.error);
-    return res.status(401).json({ error: authResult.error });
-  }
-  console.log('User authentication successful');
-
   if (req.method === 'POST') {
     try {
-      console.log('Handling POST request for verifying payment');
-      const { 
-        razorpay_order_id, 
-        razorpay_payment_id, 
-        razorpay_signature,
-        orderId,
-        amount 
-      } = req.body;
+      console.log('Handling Razorpay webhook');
 
-      // Validate input data
-      if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature || !orderId || !amount) {
-        return res.status(400).json({ error: 'Invalid request data' });
-      }
-
-      // Verify the signature
-      const body = razorpay_order_id + '|' + razorpay_payment_id;
+      const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
+      const signature = req.headers['x-razorpay-signature'];
+      const body = JSON.stringify(req.body);
+      console.log('Webhook signature:', signature);
+      console.log('Webhook payload:', body);
+      // Validate webhook signature
       const expectedSignature = crypto
-        .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
-        .update(body.toString())
+        .createHmac('sha256', webhookSecret)
+        .update(body)
         .digest('hex');
 
-      if (expectedSignature === razorpay_signature) {
-        // Update order status
-        await Order.findByIdAndUpdate(orderId, { status: 'processing' });
+      if (signature !== expectedSignature) {
+        console.error('Invalid webhook signature');
+        return res.status(400).json({ error: 'Invalid webhook signature' });
+      }
 
-        // Create payment record
+      console.log('Webhook signature verified');
+
+      // Extract event data from webhook payload
+      const event = req.body.event;
+      const payload = req.body.payload;
+
+      if (event === 'payment.captured') {
+        console.log('Processing payment.captured event');
+
+        const razorpayOrderId = payload.payment.entity.order_id;
+        const razorpayPaymentId = payload.payment.entity.id;
+        const amount = payload.payment.entity.amount / 100; // Convert from paise to INR
+        const { orderId, userId } = payload.payment.entity.notes;
+
+        // Check if payment already processed
+        const existingPayment = await Payment.findOne({ razorpayPaymentId });
+        if (existingPayment) {
+          console.log('Payment already processed');
+          return res.status(200).json({ success: true });
+        }
+
+        // Find order by Razorpay Order ID
+        const order = await Order.findOne({ _id: orderId }).populate('userId');
+        if (!order || !order.userId) {
+          console.error('Order or user not found');
+          return res.status(404).json({ error: 'Order or user details not found' });
+        }
+
+        // Update order status to 'processing'
+        order.status = 'processing';
+        await order.save();
+
+        // Store payment details
         await Payment.create({
-          orderId,
-          razorpayOrderId: razorpay_order_id,
-          razorpayPaymentId: razorpay_payment_id,
+          orderId: order._id,
+          razorpayOrderId,
+          razorpayPaymentId,
           amount,
           status: 'completed'
         });
 
-        res.json({ success: true });
-      } else {
-        res.status(400).json({ error: 'Invalid signature' });
+        // Format order items for email
+        const orderItems = order.items
+          .map(item => `<li>${item.name} - ${item.quantity} x ₹${item.price.toFixed(2)}</li>`)
+          .join('');
+
+        // Send email to customer
+        const customerEmailBody = `
+          <h2>Order Confirmation</h2>
+          <p>Hi ${order.userId.name},</p>
+          <p>Thank you for your purchase! Your order has been confirmed and will be shipped soon.</p>
+          <p><strong>Order Details:</strong></p>
+          <ul>${orderItems}</ul>
+          <p><strong>Total Amount:</strong> ₹${amount.toFixed(2)}</p>
+          <p><strong>Estimated Delivery:</strong> 5-7 days</p>
+          <p>We appreciate your business!</p>
+        `;
+        await sendEmail(order.userId.email, 'Order Confirmation', '', customerEmailBody);
+
+        // Send email to owner
+        const ownerEmailBody = `
+          <h2>New Order Received</h2>
+          <p><strong>Customer:</strong> ${order.userId.name} (${order.userId.email})</p>
+          <p><strong>Order ID:</strong> ${order._id}</p>
+          <p><strong>Amount:</strong> ₹${amount.toFixed(2)}</p>
+          <p><strong>Items Ordered:</strong></p>
+          <ul>${orderItems}</ul>
+        `;
+        await sendEmail(process.env.OWNER_EMAIL, 'New Order Received', '', ownerEmailBody);
+
+        return res.status(200).json({ success: true, orderId: order._id, amount });
       }
+
+      console.log('Unhandled event type:', event);
+      return res.status(200).json({ success: true });
+
     } catch (error) {
-      console.error('Error in verifying payment:', error.message);
-      res.status(500).json({ error: 'Internal server error' });
+      console.error('Error processing Razorpay webhook:', error);
+      return res.status(500).json({ error: 'Internal server error' });
     }
   } else {
-    console.log('Method not allowed:', req.method);
-    res.status(405).json({ error: 'Method Not Allowed' });
+    return res.status(405).json({ error: 'Method Not Allowed' });
   }
 }
