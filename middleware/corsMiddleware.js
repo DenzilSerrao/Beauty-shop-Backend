@@ -15,10 +15,10 @@ const allowedOrigins = [
 export const corsMiddleware = (req, res) => {
   const origin = req.headers.origin;
 
-  if (origin && allowedOrigins.includes(origin)) {
+  if (origin) {
     res.setHeader('Access-Control-Allow-Origin', origin);
-  } else {
-    res.setHeader('Access-Control-Allow-Origin', origin); // No origin allowed
+  } else if (origin) {
+    res.setHeader('Access-Control-Allow-Origin', ''); // No origin allowed
   }
 
   res.setHeader('Access-Control-Allow-Methods', corsHeaders['Access-Control-Allow-Methods']);
