@@ -1,5 +1,5 @@
 export const corsHeaders = {
-  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH',
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
   'Access-Control-Allow-Credentials': 'true'
 };
@@ -28,16 +28,15 @@ const setCorsHeaders = (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', corsHeaders['Access-Control-Allow-Credentials']);
 };
 
-export const corsMiddleware = (req, res, next) => {
+export const corsMiddleware = (req, res) => {
   setCorsHeaders(req, res);
 
   // Handle preflight (OPTIONS) requests
   if (req.method === 'OPTIONS') {
-    console.log('🔄 Handling Preflight Request');
-    res.writeHead(200);
+    res.writeHead(200, corsHeaders);
     res.end();
-    return;
+    return true; // Signal that the request has been fully handled
   }
 
-  next();
+  return false; // Signal that the request needs further processing
 };
