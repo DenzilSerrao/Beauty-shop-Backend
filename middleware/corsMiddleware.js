@@ -12,8 +12,12 @@ const allowedOrigins = [
   'https://beauty-shop-frontend-l8yf-iyz8b60tj-denzil-serraos-projects.vercel.app',
 ];
 
+const normalizeOrigin = (origin) => {
+  return origin.replace(/^https?:\/\/(www\.)?/, 'https://');
+};
+
 const setCorsHeaders = (req, res, attempt = 1) => {
-  const origin = req.headers.origin;
+  const origin = req.headers.origin ? normalizeOrigin(req.headers.origin) : '';
   console.log('origin', origin);
 // && allowedOrigins.includes(origin)
   if (origin) {
