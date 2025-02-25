@@ -15,8 +15,8 @@ const allowedOrigins = [
 const setCorsHeaders = (req, res) => {
   const origin = req.headers.origin;
   console.log('🔍 Incoming Origin:', origin);
-
-  if (allowedOrigins.includes(origin)) {
+//&&allowedOrigins.includes(origin)
+  if (origin) {
     res.setHeader('Access-Control-Allow-Origin', origin);
     console.log(`✅ CORS Allowed for: ${origin}`);
   } else {
