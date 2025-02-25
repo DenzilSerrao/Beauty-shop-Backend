@@ -1,5 +1,5 @@
 export const corsHeaders = {
-  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
   'Access-Control-Allow-Credentials': 'true'
 };
@@ -12,26 +12,15 @@ const allowedOrigins = [
   'https://beauty-shop-frontend-l8yf-iyz8b60tj-denzil-serraos-projects.vercel.app',
 ];
 
-const normalizeOrigin = (origin) => {
-  return origin.replace(/^https?:\/\/(www\.)?/, 'https://');
-};
+const setCorsHeaders = (req, res) => {
+  const origin = req.headers.origin;
+  console.log('🔍 Incoming Origin:', origin);
 
-const setCorsHeaders = (req, res, attempt = 1) => {
-  const origin = req.headers.origin ? normalizeOrigin(req.headers.origin) : '';
-  console.log('origin', origin);
-// && allowedOrigins.includes(origin)
-  if (origin) {
-    try {
-      res.setHeader('Access-Control-Allow-Origin', origin);
-    } catch (error) {
-      console.error(`Attempt ${attempt}: Failed to set Access-Control-Allow-Origin header`, error);
-      if (attempt < 5) {
-        setTimeout(() => setCorsHeaders(req, res, attempt + 1), 2000);
-        return;
-      }
-    }
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    console.log(`✅ CORS Allowed for: ${origin}`);
   } else {
-    res.setHeader('Access-Control-Allow-Origin', ''); // No origin allowed
+    console.warn(`⚠️ CORS Blocked: ${origin} is not in the allowed list.`);
   }
 
   res.setHeader('Access-Control-Allow-Methods', corsHeaders['Access-Control-Allow-Methods']);
@@ -39,15 +28,16 @@ const setCorsHeaders = (req, res, attempt = 1) => {
   res.setHeader('Access-Control-Allow-Credentials', corsHeaders['Access-Control-Allow-Credentials']);
 };
 
-export const corsMiddleware = (req, res) => {
+export const corsMiddleware = (req, res, next) => {
   setCorsHeaders(req, res);
 
   // Handle preflight (OPTIONS) requests
   if (req.method === 'OPTIONS') {
-    res.writeHead(200, corsHeaders);
+    console.log('🔄 Handling Preflight Request');
+    res.writeHead(200);
     res.end();
-    return true; // Signal that the request has been fully handled
+    return;
   }
 
-  return false; // Signal that the request needs further processing
+  next();
 };
