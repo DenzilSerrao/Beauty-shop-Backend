@@ -3,6 +3,8 @@ import { Payment } from '../models/payment.js';
 import { Order } from '../models/order.js';
 import crypto from 'crypto';
 import { s_createOrder } from './orders.js';
+import { logger } from '../utils/logger.js';
+import { asyncHandler } from '../middleware/asyncHandler.js';
 
 export const createOrder = asyncHandler(async (req, res) => {
   try {
@@ -11,36 +13,50 @@ export const createOrder = asyncHandler(async (req, res) => {
 
     // Validate input data
     if (!items || !total || !shippingAddress || !customerPhone) {
-      return res.status(400).json({ error: 'Invalid request data' });
+      const error = new Error('Invalid request data');
+      await logger.error(error, req);
+      return res.status(400).json({ error: error.message });
     }
 
     // Create order in the database
     const orderData = { userId, items, total, shippingAddress, customerEmail, customerPhone };
     const orderResponse = await s_createOrder(orderData);
+    
     if (orderResponse.status !== 'success') {
-      return res.status(500).json({ error: 'Order creation failed' });
+      const error = new Error('Order creation failed');
+      error.orderData = orderData; // Attach context
+      await logger.error(error, req);
+      return res.status(500).json({ error: error.message });
     }
+
     const order = orderResponse.data.order;
 
     // Prepare Razorpay order creation options
     const options = {
-      amount: Math.round(order.total * 100), // Convert to paise
+      amount: Math.round(order.total * 100),
       currency: 'INR',
-      receipt: order._id.toString(), // Use orderId as the receipt ID
-      payment_capture: 1, // Auto-capture payment
+      receipt: order._id.toString(),
+      payment_capture: 1,
     };
 
     // Create Razorpay order
-    const razorpayOrder = await razorpay.orders.create(options);
+    let razorpayOrder;
+    try {
+      razorpayOrder = await razorpay.orders.create(options);
+    } catch (razorpayError) {
+      razorpayError.orderId = order._id; // Attach context
+      await logger.error(razorpayError, req);
+      return res.status(500).json({ error: 'Payment gateway error' });
+    }
 
     // Prepare the complete JSON object for Razorpay checkout
     const payOptions = {
-      key: process.env.RAZORPAY_KEY_ID, // Pull from .env
+      key: process.env.RAZORPAY_KEY_ID,
       amount: razorpayOrder.amount,
       currency: razorpayOrder.currency,
       name: 'Ana Beauty',
       description: 'Test Transaction',
-      order_id: razorpayOrder.id, // This is the order_id created in the backend
+      order_id: razorpayOrder.id,
       prefill: {
         email: customerEmail,
         contact: customerPhone
@@ -48,14 +64,20 @@ export const createOrder = asyncHandler(async (req, res) => {
       theme: {
         color: '#F37254'
       },
-      orderId: order._id, // Include the order ID from the database
-      total: order.total // Include the total amount
+      orderId: order._id,
+      total: order.total
     };
 
-    // Send the payOptions to the client
+    // Log successful order creation
+    logger.info('Razorpay order created successfully', {
+      orderId: order._id,
+      razorpayOrderId: razorpayOrder.id,
+      amount: order.total
+    });
+
     return res.status(200).json(payOptions);
   } catch (error) {
-    console.error('Error in createOrder:', error.message);
+    await logger.error(error, req);
     return res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -70,6 +92,13 @@ export const verifyPayment = asyncHandler(async (req, res) => {
       amount 
     } = req.body;
 
+    // Validate required fields
+    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature || !orderId || !amount) {
+      const error = new Error('Missing required payment verification fields');
+      await logger.error(error, req);
+      return res.status(400).json({ error: error.message });
+    }
+
     const body = razorpay_order_id + '|' + razorpay_payment_id;
     const expectedSignature = crypto
       .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
@@ -77,24 +106,52 @@ export const verifyPayment = asyncHandler(async (req, res) => {
       .digest('hex');
 
     if (expectedSignature === razorpay_signature) {
-      // Update order status
-      await Order.findByIdAndUpdate(orderId, { status: 'processing' });
+      try {
+        // Update order status
+        await Order.findByIdAndUpdate(orderId, { status: 'processing' });
 
-      // Create payment record
-      await Payment.create({
-        orderId,
-        razorpayOrderId: razorpay_order_id,
-        razorpayPaymentId: razorpay_payment_id,
-        amount,
-        status: 'completed'
-      });
-      console.log('Payment verified successfully');
-      res.json({ success: true });
+        // Create payment record
+        await Payment.create({
+          orderId,
+          razorpayOrderId: razorpay_order_id,
+          razorpayPaymentId: razorpay_payment_id,
+          amount,
+          status: 'completed'
+        });
+
+        logger.info('Payment verified successfully', {
+          orderId,
+          razorpayOrderId: razorpay_order_id,
+          razorpayPaymentId: razorpay_payment_id,
+          amount
+        });
+
+        return res.json({ success: true });
+      } catch (dbError) {
+        dbError.paymentData = {
+          razorpay_order_id,
+          razorpay_payment_id,
+          orderId,
+          amount
+        };
+        await logger.error(dbError, req);
+        return res.status(500).json({ error: 'Failed to update payment records' });
+      }
     } else {
-      res.status(400).json({ error: 'Invalid signature' });
+      const error = new Error('Invalid signature');
+      error.paymentData = {
+        razorpay_order_id,
+        razorpay_payment_id,
+        orderId,
+        amount,
+        receivedSignature: razorpay_signature,
+        expectedSignature
+      };
+      await logger.error(error, req);
+      return res.status(400).json({ error: 'Invalid signature' });
     }
   } catch (error) {
-    console.error('Error in verifyPayment:', error.message);
+    await logger.error(error, req);
     return res.status(500).json({ error: 'Internal server error' });
   }
 });

@@ -1,108 +1,151 @@
-import { connectDB } from '../lib/db.js'; // Import the connectDB function
+import { connectDB } from '../lib/db.js';
 import { User } from '../models/user.js';
 import jwt from 'jsonwebtoken';
 import { ValidationError, AuthenticationError } from '../utils/errors.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
+import { logger } from '../utils/logger.js';
 
 export const register = asyncHandler(async (req, res) => {
   const { name, email, password } = req.body;
 
-  // Ensure that database connection is established before proceeding
-  await connectDB();
+  try {
+    // Ensure database connection
+    await connectDB();
+    logger.info('Attempting user registration', { email });
 
-  // Validate required fields
-  if (!name || !email || !password) {
-    throw new ValidationError('Name, email, and password are required');
+    // Validate required fields
+    if (!name || !email || !password) {
+      const error = new ValidationError('Name, email, and password are required');
+      await logger.error(error, req);
+      throw error;
+    }
+
+    // Check for existing user
+    const existingUser = await User.findOne({ email }).exec();
+    if (existingUser) {
+      const error = new ValidationError('Email already registered');
+      await logger.error(error, req);
+      throw error;
+    }
+
+    // Create new user
+    const user = await User.create({ name, email, password });
+    logger.info('User registered successfully', { userId: user.id, email });
+
+    // Generate JWT token
+    const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '10h' });
+
+    // Send response
+    res.status(201).json({
+      status: 'success',
+      data: {
+        user: { id: user.id, name: user.name, email: user.email, role: user.role },
+        token,
+      },
+    });
+
+  } catch (error) {
+    await logger.error(error, req);
+    throw error;
   }
-
-  // Check if the user already exists
-  const existingUser = await User.findOne({ email }).exec(); // Using `.exec()` to ensure query execution
-  if (existingUser) {
-    throw new ValidationError('Email already registered');
-  }
-
-  // Create a new user
-  const user = await User.create({ name, email, password });
-
-  // Generate JWT token with an expiration time of 1 hour for added security
-  const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '10h' });
-
-  // Send response
-  res.status(201).json({
-    status: 'success',
-    data: {
-      user: { id: user.id, name: user.name, email: user.email, role: user.role },
-      token,
-    },
-  });
 });
 
 export const login = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
-  // Ensure DB connection is established before queries
-  await connectDB();
+  try {
+    // Ensure DB connection
+    await connectDB();
+    logger.info('Attempting user login', { email });
 
-  // Validate required fields
-  if (!email || !password) {
-    throw new ValidationError('Email and password are required');
+    // Validate required fields
+    if (!email || !password) {
+      const error = new ValidationError('Email and password are required');
+      await logger.error(error, req);
+      throw error;
+    }
+
+    // Find user
+    const user = await User.findOne({ email }).exec();
+    if (!user) {
+      const error = new AuthenticationError('Invalid credentials');
+      await logger.error(error, req);
+      throw error;
+    }
+
+    // Compare password
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch) {
+      const error = new AuthenticationError('Invalid credentials');
+      await logger.error(error, req);
+      throw error;
+    }
+
+    // Generate JWT token
+    const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    logger.info('User logged in successfully', { userId: user.id, email });
+
+    // Send response
+    res.json({
+      status: 'success',
+      data: {
+        user: { id: user.id, name: user.name, email: user.email, role: user.role },
+        token,
+      },
+    });
+
+  } catch (error) {
+    await logger.error(error, req);
+    throw error;
   }
-
-  // Find the user by email
-  const user = await User.findOne({ email }).exec(); // Using `.exec()` to ensure query execution
-
-  // Validate user existence
-  if (!user) {
-    throw new AuthenticationError('Invalid credentials');
-  }
-
-  // Compare password
-  const isMatch = await user.comparePassword(password); // Assuming comparePassword is a method on the User instance
-  if (!isMatch) {
-    throw new AuthenticationError('Invalid credentials');
-  }
-
-  // Generate JWT token with expiration time of 1 hour
-  const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-
-  // Send response with user details and the JWT token
-  res.json({
-    status: 'success',
-    data: {
-      user: { id: user.id, name: user.name, email: user.email, role: user.role },
-      token,
-    },
-  });
 });
 
 export const verifyToken = asyncHandler(async (req, res) => {
   const token = req.headers.authorization?.split(' ')[1];
 
-  if (!token) {
-    throw new AuthenticationError('No token provided');
-  }
-
   try {
-    // Ensure database connection is established
+    if (!token) {
+      const error = new AuthenticationError('No token provided');
+      await logger.error(error, req);
+      throw error;
+    }
+
+    // Ensure database connection
     await connectDB();
+    logger.info('Verifying token');
 
     // Verify the token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // Find the user by the decoded user ID
+    // Find user
     const user = await User.findById(decoded.userId).exec();
-
     if (!user) {
-      throw new AuthenticationError('User not found');
+      const error = new AuthenticationError('User not found');
+      await logger.error(error, req);
+      throw error;
     }
 
-    // Token is valid and user exists
+    logger.info('Token verified successfully', { userId: user.id });
+
+    // Send response
     res.json({
       status: 'success',
-      data: { valid: true, user: { id: user.id, name: user.name, email: user.email, role: user.role } },
+      data: { 
+        valid: true, 
+        user: { 
+          id: user.id, 
+          name: user.name, 
+          email: user.email, 
+          role: user.role 
+        } 
+      },
     });
+
   } catch (error) {
-    console.error('Token verification error:', error);
-    throw new AuthenticationError('Invalid token');
+    await logger.error(error, req);
+    if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
+      throw new AuthenticationError('Invalid token');
+    }
+    throw error;
   }
 });

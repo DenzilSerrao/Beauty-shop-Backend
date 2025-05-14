@@ -1,4 +1,4 @@
-import { connectDB } from '../lib/db.js'; // Import the connectDB function
+import { connectDB } from '../lib/db.js';
 import { Order } from '../models/order.js';
 import { User } from '../models/user.js';
 import { Product } from '../models/product.js';
@@ -6,28 +6,27 @@ import { asyncHandler } from '../utils/asyncHandler.js';
 import { NotFoundError, ValidationError } from '../utils/errors.js';
 import { generateInvoice } from '../utils/invoice.js';
 import mongoose from 'mongoose';
+import { logger } from '../utils/logger.js';
 
 export const getOrders = asyncHandler(async (req, res) => {
-  // Ensure database connection is established before proceeding
   await connectDB();
 
   try {
-    const userId = req.user.id; // Adjust based on your auth setup
+    const userId = req.user.id;
 
     // Validate userId
     if (!mongoose.Types.ObjectId.isValid(userId)) {
-      throw new ValidationError('Invalid user ID');
+      const error = new ValidationError('Invalid user ID');
+      await logger.error(error, req);
+      return res.status(400).json({ status: 'fail', message: error.message });
     }
 
-    console.log('Fetching orders from:', userId);
+    logger.info('Fetching orders for user', { userId });
 
-    // Execute the query to get orders for the user
     const orders = await Order.findByUser(userId).exec();
 
-    console.log('Orders query executed:', orders);
-
     if (!orders || orders.length === 0) {
-      console.log('No orders found for user:', userId);
+      logger.info('No orders found for user', { userId });
       return res.status(404).json({ status: 'fail', message: 'No orders found for this user' });
     }
 
@@ -36,17 +35,12 @@ export const getOrders = asyncHandler(async (req, res) => {
       orders.flatMap(order => order.items.map(item => item.name.trim()))
     );
 
-    console.log('Product Names to Fetch:', Array.from(productNames));
+    logger.info('Fetching product details', { productNames: Array.from(productNames) });
 
-    // Query the Product collection to get product details based on names
     const products = await Product.find({ name: { $in: Array.from(productNames) } }).exec();
 
-    console.log('Fetched Products:', products);
-
-    // Create a map for quick lookup of product details by name
+    // Create product map for quick lookup
     const productMap = new Map(products.map(product => [product.name.trim(), product]));
-
-    console.log('Product Map:', productMap);
 
     // Attach image1 path to each order item
     const enrichedOrders = orders.map(order => ({
@@ -54,7 +48,7 @@ export const getOrders = asyncHandler(async (req, res) => {
       items: order.items.map(item => {
         const product = productMap.get(item.name.trim());
         if (!product) {
-          console.warn(`Product not found for item name: ${item.name}`);
+          logger.warn('Product not found for item', { itemName: item.name });
         }
         return {
           ...item.toObject(),
@@ -63,150 +57,187 @@ export const getOrders = asyncHandler(async (req, res) => {
       })
     }));
 
-    console.log('Orders fetched and enriched successfully:', enrichedOrders);
+    logger.info('Successfully fetched and enriched orders', { 
+      userId, 
+      orderCount: enrichedOrders.length 
+    });
 
     return res.status(200).json({
       status: 'success',
       data: { orders: enrichedOrders },
     });
   } catch (error) {
-    console.error('Error fetching user orders:', error);
-    throw error; // Rethrow the error to be caught by asyncHandler
+    await logger.error(error, req);
+    throw error;
   }
 });
 
 export const getOrder = asyncHandler(async (orderId, req, res) => {
-  // Ensure database connection is established before proceeding
   await connectDB();
 
   try {
-    console.log('Fetching order:', orderId);
-    // Validate orderId
+    logger.info('Fetching order details', { orderId });
+
     if (!mongoose.Types.ObjectId.isValid(orderId)) {
-      throw new ValidationError('Invalid order ID');
+      const error = new ValidationError('Invalid order ID');
+      await logger.error(error, req);
+      return res.status(400).json({ status: 'fail', message: error.message });
     }
 
     const order = await Order.findById(orderId).populate('userId', 'name email');
 
     if (!order) {
-      throw new NotFoundError('Order not found');
+      const error = new NotFoundError('Order not found');
+      await logger.error(error, req);
+      return res.status(404).json({ status: 'fail', message: error.message });
     }
 
-    // Check if the user owns the order
+    // Check ownership
     if (order.userId.toString() !== req.user.id) {
-      throw new NotFoundError('Forbidden: User does not own this order');
+      const error = new NotFoundError('Forbidden: User does not own this order');
+      error.statusCode = 403;
+      await logger.error(error, req);
+      return res.status(403).json({ status: 'fail', message: error.message });
     }
 
-    res.status(200).json({
+    logger.info('Successfully fetched order', { orderId });
+
+    return res.status(200).json({
       status: 'success',
       data: { order }
     });
   } catch (error) {
-    console.error('Error fetching order:', error);
-    throw new Error('Failed to fetch order');
+    await logger.error(error, req);
+    throw error;
   }
 });
 
-export const deleteOrder = asyncHandler(async (orderId, res) => {
-  // Ensure database connection is established before proceeding
+export const deleteOrder = asyncHandler(async (orderId, req, res) => {
   await connectDB();
 
   try {
-    console.log('Deleting order:', orderId);
+    logger.info('Attempting to delete order', { orderId });
+
+    if (!mongoose.Types.ObjectId.isValid(orderId)) {
+      const error = new ValidationError('Invalid order ID');
+      await logger.error(error, req);
+      return res.status(400).json({ status: 'fail', message: error.message });
+    }
+
     const order = await Order.findByIdAndDelete(orderId);
 
     if (!order) {
-      return res.status(404).json({ status: 'fail', message: 'Order not found' });
+      const error = new NotFoundError('Order not found');
+      await logger.error(error, req);
+      return res.status(404).json({ status: 'fail', message: error.message });
     }
+
+    logger.info('Successfully deleted order', { orderId });
+
+    return res.status(204).send();
   } catch (error) {
-    console.error('Error deleting order:', error);
-    throw new Error('Failed to delete order');
+    await logger.error(error, req);
+    throw error;
   }
 });
 
-
-export const s_createOrder = async (orderData) => {
+export const s_createOrder = async (orderData, req = null) => {
   const { userId, items, total, shippingAddress, customerEmail, customerPhone } = orderData;
 
-  // Validate input
-  if (!items || !total || !shippingAddress || !customerPhone) {
-    throw new ValidationError('Invalid order data');
-  }
-
-  // Ensure the _id field in the items array is set to an ObjectId
-  const itemsWithObjectId = items.map(item => ({
-    ...item,
-    _id: new mongoose.Types.ObjectId(item._id),
-  }));
-
   try {
-    // Validate and convert userId to ObjectId
-    if (!mongoose.Types.ObjectId.isValid(userId)) {
-      throw new ValidationError('Invalid userId');
+    logger.info('Creating new order', { userId });
+
+    // Validate input
+    if (!items || !total || !shippingAddress || !customerPhone) {
+      const error = new ValidationError('Invalid order data');
+      error.orderData = orderData;
+      await logger.error(error, req);
+      throw error;
     }
 
-    // Create order in the database
+    // Convert items to proper ObjectId format
+    const itemsWithObjectId = items.map(item => ({
+      ...item,
+      _id: new mongoose.Types.ObjectId(item._id),
+    }));
+
+    // Validate userId
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      const error = new ValidationError('Invalid userId');
+      error.userId = userId;
+      await logger.error(error, req);
+      throw error;
+    }
+
     const order = await Order.create({
-      userId: new mongoose.Types.ObjectId(userId), // Convert userId to ObjectId
+      userId: new mongoose.Types.ObjectId(userId),
       items: itemsWithObjectId,
       total,
       shippingAddress,
       customerEmail,
       customerPhone
     });
-    console.log('Order created successfully in the database:', order);
+
+    logger.info('Order created successfully', { 
+      orderId: order._id,
+      userId,
+      itemCount: items.length,
+      total
+    });
 
     return {
       status: 'success',
       data: { order }
     };
   } catch (error) {
-    console.error('Error creating order:', error);
-    throw new Error('Order creation failed');
+    await logger.error(error, req);
+    throw error;
   }
 };
 
 export const generateOrderInvoice = asyncHandler(async (req, res) => {
-  // Ensure database connection is established before proceeding
   await connectDB();
 
   try {
-    const { orderId } = req.query;
-    const { userId } = req.query;
-    console.log('Fetching order invoice:', orderId, userId);
-    // Validate orderId and userId
+    const { orderId, userId } = req.query;
+    logger.info('Generating invoice', { orderId, userId });
+
+    // Validate IDs
     if (!mongoose.Types.ObjectId.isValid(orderId)) {
-      throw new Error('Invalid order ID');
+      const error = new ValidationError('Invalid order ID');
+      await logger.error(error, req);
+      return res.status(400).json({ error: error.message });
     }
     if (!mongoose.Types.ObjectId.isValid(userId)) {
-      throw new Error('Invalid user ID');
+      const error = new ValidationError('Invalid user ID');
+      await logger.error(error, req);
+      return res.status(400).json({ error: error.message });
     }
 
     const order = await Order.findById(orderId);
     if (!order) {
-      console.log('Order not found in database');
-      throw new Error('Order not found');
+      const error = new NotFoundError('Order not found');
+      await logger.error(error, req);
+      return res.status(404).json({ error: error.message });
     }
 
-    console.log('Order fetched successfully:', order);
-
-    console.log('Fetching user with ID:', userId);
     const user = await User.findById(userId);
     if (!user) {
-      console.log('User not found in database');
-      throw new Error('User not found');
+      const error = new NotFoundError('User not found');
+      await logger.error(error, req);
+      return res.status(404).json({ error: error.message });
     }
 
-    console.log('User fetched successfully:', user);
-
-    // Check if the user owns the order
+    // Check ownership
     if (order.userId.toString() !== userId) {
-      console.log('User does not own the order');
-      throw new Error('Forbidden: User does not own this order');
+      const error = new NotFoundError('Forbidden: User does not own this order');
+      error.statusCode = 403;
+      await logger.error(error, req);
+      return res.status(403).json({ error: error.message });
     }
 
     const invoice = generateInvoice(order, user);
-    console.log('Invoice generated successfully:', invoice);
+    logger.info('Invoice generated successfully', { orderId, userId });
 
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename=invoice-${order._id}.pdf`);
@@ -214,7 +245,7 @@ export const generateOrderInvoice = asyncHandler(async (req, res) => {
     invoice.pipe(res);
     invoice.end();
   } catch (error) {
-    console.error('Error fetching order invoice:', error);
-    res.status(500).json({ error: 'Failed to fetch order invoice' });
+    await logger.error(error, req);
+    return res.status(500).json({ error: 'Failed to generate invoice' });
   }
 });
