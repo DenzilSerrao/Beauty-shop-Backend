@@ -44,6 +44,7 @@ export const register = asyncHandler(async (req, res) => {
   });
 });
 
+// controllers/auth.js
 export const login = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
@@ -54,6 +55,7 @@ export const login = asyncHandler(async (req, res) => {
   // Validate required fields
   if (!email || !password) {
     const error = new ValidationError('Email and password are required');
+    error.statusCode = 400;
     error.context = { email };
     throw error;
   }
@@ -62,6 +64,7 @@ export const login = asyncHandler(async (req, res) => {
   const user = await User.findOne({ email }).exec();
   if (!user) {
     const error = new AuthenticationError('Invalid credentials');
+    error.statusCode = 401;
     error.context = { email };
     throw error;
   }
@@ -70,6 +73,7 @@ export const login = asyncHandler(async (req, res) => {
   const isMatch = await user.comparePassword(password);
   if (!isMatch) {
     const error = new AuthenticationError('Invalid credentials');
+    error.statusCode = 401;
     error.context = { email };
     throw error;
   }
@@ -79,7 +83,7 @@ export const login = asyncHandler(async (req, res) => {
   logger.info('User logged in successfully', { userId: user.id, email });
 
   // Send response
-  res.json({
+  return res.json({
     status: 'success',
     data: {
       user: { id: user.id, name: user.name, email: user.email, role: user.role },
