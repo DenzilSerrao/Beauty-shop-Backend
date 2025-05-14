@@ -3,7 +3,7 @@ import { ErrorLog } from '../models/error.js';
 
 // Ensure database connection is established
 await connectDB();
-
+console.log('Database connection established for logging errors.');
 export const logger = {
   error: async (err, req = null) => {
     const errorLog = {
