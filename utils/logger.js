@@ -1,18 +1,8 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 
-dotenv.config();
-
-const mongoURI = process.env.MONGODB_URI;
-
-if (!mongoURI) {
-  console.error('MONGO_URI not found in environment variables');
-}
-
-mongoose.connect(mongoURI)
-  .then(() => console.log('MongoDB connected for error logging'))
-  .catch(err => console.error('MongoDB connection error for logging:', err));
-
+// Ensure database connection is established
+await connectDB();
 export const logger = {
   error: async (err, req = null) => {
     const errorLog = {
