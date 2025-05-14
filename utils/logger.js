@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { connectDB } from './config/database.js';
+import { connectDB } from '../lib/db.js';
 
 // Ensure database connection is established
 await connectDB();
