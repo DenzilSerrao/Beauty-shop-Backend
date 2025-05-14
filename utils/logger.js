@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import dotenv from 'dotenv';
+import { connectDB } from './config/database.js';
 
 // Ensure database connection is established
 await connectDB();
