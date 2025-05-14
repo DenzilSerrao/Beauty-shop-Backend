@@ -48,47 +48,55 @@ export const register = asyncHandler(async (req, res) => {
 export const login = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
-  // Ensure DB connection
-  await connectDB();
-  logger.info('Attempting user login', { email });
-
-  // Validate required fields
+  // Input validation
   if (!email || !password) {
     const error = new ValidationError('Email and password are required');
     error.statusCode = 400;
-    error.context = { email };
     throw error;
   }
+
+  // Ensure DB connection
+  await connectDB();
+  logger.info('Attempting user login', { email });
 
   // Find user
   const user = await User.findOne({ email }).exec();
   if (!user) {
     const error = new AuthenticationError('Invalid credentials');
     error.statusCode = 401;
-    error.context = { email };
     throw error;
   }
 
-  // Compare password
+  // Verify password
   const isMatch = await user.comparePassword(password);
   if (!isMatch) {
     const error = new AuthenticationError('Invalid credentials');
     error.statusCode = 401;
-    error.context = { email };
     throw error;
   }
 
   // Generate JWT token
-  const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-  logger.info('User logged in successfully', { userId: user.id, email });
+  const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { 
+    expiresIn: '1h' 
+  });
 
-  // Send response
-  return res.json({
+  logger.info('User logged in successfully', { 
+    userId: user.id,
+    email: user.email 
+  });
+
+  // Return success response
+  return res.status(200).json({
     status: 'success',
     data: {
-      user: { id: user.id, name: user.name, email: user.email, role: user.role },
-      token,
-    },
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role
+      },
+      token
+    }
   });
 });
 
