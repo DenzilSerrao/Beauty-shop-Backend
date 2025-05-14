@@ -1,5 +1,5 @@
 // utils/logger.js
-import { ErrorLog } from '../models/errorLog.js';
+import { ErrorLog } from '../models/error.js';
 
 export const logger = {
   error: async (err, req = null) => {
