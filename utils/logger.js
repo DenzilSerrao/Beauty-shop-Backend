@@ -1,5 +1,5 @@
 import { connectDB } from '../lib/db.js';
-import { ErrorLog } from './models/errorLog.js';
+import { ErrorLog } from '../models/error.js';
 
 // Ensure database connection is established
 await connectDB();
