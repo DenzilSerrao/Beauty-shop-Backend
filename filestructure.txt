@@ -47,6 +47,7 @@
     |-- isAdminAuth.js
     |-- userAuth.js
 |-- models
+    |-- error.js
     |-- order.js
     |-- payment.js
     |-- product.js
