@@ -100,34 +100,36 @@ export const login = asyncHandler(async (req, res) => {
   }
 });
 
+// controllers/auth.js
 export const verifyToken = asyncHandler(async (req, res) => {
   const token = req.headers.authorization?.split(' ')[1];
 
   try {
     if (!token) {
       const error = new AuthenticationError('No token provided');
-      await logger.error(error, req);
+      error.statusCode = 401; // Explicitly set status code
+      await logger.error(error, req); // Make sure req is passed
       throw error;
     }
 
-    // Ensure database connection
     await connectDB();
-    logger.info('Verifying token');
-
-    // Verify the token
+    
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-    // Find user
     const user = await User.findById(decoded.userId).exec();
+
     if (!user) {
       const error = new AuthenticationError('User not found');
+      error.statusCode = 404;
+      error.context = { decodedUserId: decoded.userId }; // Add context for debugging
       await logger.error(error, req);
       throw error;
     }
 
-    logger.info('Token verified successfully', { userId: user.id });
+    logger.info('Token verified successfully', { 
+      userId: user.id,
+      route: req.originalUrl 
+    });
 
-    // Send response
     res.json({
       status: 'success',
       data: { 
@@ -142,10 +144,20 @@ export const verifyToken = asyncHandler(async (req, res) => {
     });
 
   } catch (error) {
-    await logger.error(error, req);
-    if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
-      throw new AuthenticationError('Invalid token');
+    // Add specific handling for JWT errors
+    if (error.name === 'JsonWebTokenError') {
+      error = new AuthenticationError('Invalid token');
+      error.statusCode = 401;
+    } else if (error.name === 'TokenExpiredError') {
+      error = new AuthenticationError('Token expired');
+      error.statusCode = 401;
     }
+    
+    // Ensure error has proper context before logging
+    if (!error.statusCode) error.statusCode = 500;
+    error.context = error.context || { token: token ? 'present' : 'missing' };
+    
+    await logger.error(error, req);
     throw error;
   }
 });

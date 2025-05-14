@@ -1,9 +1,6 @@
-import { connectDB } from '../lib/db.js';
-import { ErrorLog } from '../models/error.js';
+// utils/logger.js
+import { ErrorLog } from '../models/errorLog.js';
 
-// Ensure database connection is established
-await connectDB();
-console.log('Database connection established for logging errors.');
 export const logger = {
   error: async (err, req = null) => {
     const errorLog = {
@@ -18,14 +15,11 @@ export const logger = {
       requestQuery: req?.query,
       user: req?.user?._id,
       ipAddress: req?.ip || req?.socket?.remoteAddress,
-      userAgent: req?.get('user-agent')
+      userAgent: typeof req?.get === 'function' ? req.get('user-agent') : undefined,
+      ...(err.context && { context: err.context })
     };
 
-    console.error('Error:', {
-      message: err.message,
-      stack: err.stack,
-      timestamp: new Date().toISOString()
-    });
+    console.error('Error:', errorLog);
 
     try {
       const loggedError = await ErrorLog.create(errorLog);
@@ -33,7 +27,6 @@ export const logger = {
       return loggedError;
     } catch (dbErr) {
       console.error('Failed to log error to database:', dbErr.message);
-      // Fallback to console if database logging fails
       console.error('Original error that failed to log:', errorLog);
       return null;
     }
@@ -46,8 +39,6 @@ export const logger = {
       timestamp: new Date().toISOString()
     };
     console.log('Info:', infoLog);
-    // Optional: You could also create an InfoLog model similar to ErrorLog
-    // if you want to persist info logs to database
     return infoLog;
   }
 };
