@@ -1,8 +1,6 @@
-|-- .env
 |-- .gitignore
-|-- .vercel
-    |-- project.json
-    |-- README.txt
+|-- .idx
+    |-- dev.nix
 |-- api
     |-- admin
         |-- allOrders
@@ -55,8 +53,6 @@
     |-- user.js
 |-- package-lock.json
 |-- package.json
-|-- public
-    |-- products
 |-- README.md
 |-- routes
     |-- adminRoutes.js
@@ -67,6 +63,7 @@
     |-- products.js
 |-- services
     |-- auth.service.js
+    |-- email.service.js
 |-- src
     |-- server.js
     |-- types
