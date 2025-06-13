@@ -48,7 +48,7 @@ router.post(
         amount: razorpayOrder.amount,
         currency: razorpayOrder.currency,
         name: 'Ana Beauty',
-        description: 'Test Transaction',
+        description: 'Live Transaction',
         order_id: razorpayOrder.id, // This is the order_id created in the backend
         // callback_url: '/orders', // Your success URL
         prefill: {
