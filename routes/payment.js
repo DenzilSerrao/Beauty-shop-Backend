@@ -98,7 +98,7 @@ router.post('/verify-payment', auth, asyncHandler(async (req, res) => {
       status: 'completed'
     });
 
-    res.json({ success: true });
+    res.status(200);
   } else {
     res.status(400).json({ error: 'Invalid signature' });
   }
