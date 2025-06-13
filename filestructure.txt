@@ -1,3 +1,4 @@
+|-- .env
 |-- .gitignore
 |-- .idx
     |-- dev.nix
@@ -66,6 +67,13 @@
     |-- auth.service.js
     |-- email.service.js
 |-- src
+    |-- controllers
+        |-- adminController.js
+        |-- auth.controller.js
+        |-- auth.js
+        |-- orders.js
+        |-- payments.js
+        |-- products.js
     |-- server.js
     |-- types
         |-- index.ts
