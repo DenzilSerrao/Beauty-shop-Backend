@@ -14,11 +14,16 @@ const allowedOrigins = [
 
 const setCorsHeaders = (req, res) => {
   const origin = req.headers.origin;
-  console.log('🔍 Incoming Origin:', origin);
-//&&allowedOrigins.includes(origin)
-  if (origin) {
+  // If an origin header exists set the header.
+  if (origin && allowedOrigins.includes(origin)) {
     res.setHeader('Access-Control-Allow-Origin', origin);
     console.log(`✅ CORS Allowed for: ${origin}`);
+  }
+  // If there's no origin header and it's the Razorpay webhook, allow it without warning.
+  else if (!origin && req.originalUrl === '/api/payment/verify-payment') {
+    // Allow all origins for this endpoint.
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    console.log('ℹ️ Razorpay webhook: No Origin header, allowing by default.');
   } else {
     console.warn(`⚠️ CORS Blocked: ${origin} is not in the allowed list.`);
   }

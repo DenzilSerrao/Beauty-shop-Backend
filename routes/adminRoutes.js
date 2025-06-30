@@ -1,4 +1,3 @@
-// filepath: /c:/Users/win10/Desktop/mern/project-bolt-sb1-8tfedy (18)/project/server/src/routes/adminRoutes.js
 import express from 'express';
 import { auth } from '../middleware/auth.js';
 import { getAllOrders, AdmingetOrder, AdmindeleteOrder, updateOrderStatus } from '../controllers/adminController.js';

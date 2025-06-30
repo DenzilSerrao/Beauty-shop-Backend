@@ -1,4 +1,3 @@
-// models/errorLog.js
 import mongoose from 'mongoose';
 
 const errorLogSchema = new mongoose.Schema({

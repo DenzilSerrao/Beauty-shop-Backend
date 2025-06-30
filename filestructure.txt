@@ -30,9 +30,7 @@
     |-- products
         |-- index.js
 |-- config
-    |-- database.js
     |-- razorpay.js
-    |-- server.js
 |-- controllers
     |-- adminController.js
     |-- auth.controller.js
@@ -59,7 +57,6 @@
 |-- routes
     |-- adminRoutes.js
     |-- auth.js
-    |-- auth.routes.js
     |-- orders.js
     |-- payment.js
     |-- products.js
