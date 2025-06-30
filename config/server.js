@@ -15,27 +15,27 @@ dotenv.config();
 
 const app = express();
 
-const allowedOrigins = [
-  'https://beauty-shop-frontend-l8yf.vercel.app',  // First frontend domain
-  'https://www.anabeauty.co.in',  // New domain
-  'https://anabeauty.co.in',  // New domain
-  'http://localhost:5173' // Add this for local development
-];
+// const allowedOrigins = [
+//   'https://beauty-shop-frontend-l8yf.vercel.app',  // First frontend domain
+//   'https://www.anabeauty.co.in',  // New domain
+//   'https://anabeauty.co.in',  // New domain
+//   'http://localhost:5173' // Add this for local development
+// ];
 
-const corsOptions = {
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS, Origin not in the list'));
-    }
-  },
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-};
+// const corsOptions = {
+//   origin: function (origin, callback) {
+//     if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+//       callback(null, true);
+//     } else {
+//       callback(new Error('Not allowed by CORS, Origin not in the list'));
+//     }
+//   },
+//   methods: ['GET', 'POST', 'PUT', 'DELETE'],
+//   allowedHeaders: ['Content-Type', 'Authorization'],
+// };
 
 app.use(cors());
-app.options('*', cors(corsOptions));  // This handles preflight (OPTIONS) requests globally
+app.options('*', cors());  // This handles preflight (OPTIONS) requests globally
 
 app.use(express.json());
 
