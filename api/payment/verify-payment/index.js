@@ -2,7 +2,6 @@ import { corsMiddleware } from '../../../middleware/corsMiddleware.js';
 import { connectDB } from '../../../lib/db.js';
 import { Order } from '../../../models/order.js';
 import { Payment } from '../../../models/payment.js';
-import { User } from '../../../models/user.js'; // Import the User model
 import { sendEmail } from '../../../services/email.service.js';
 import crypto from 'crypto';
 
@@ -112,12 +111,12 @@ export default async function handler(req, res) {
           <ul>${orderItems}</ul>
         `;
         await sendEmail(process.env.OWNER_EMAIL, 'New Order Received', '', ownerEmailBody);
-
-        return res.status(200).json({ success: true, orderId: order._id, amount });
+        console.log('Payment processed and emails sent successfully and returned a status of 200');
+        return res.status(200).json({ status: 'ok' });
       }
 
       console.log('Unhandled event type:', event);
-      return res.status(200).json({ success: true });
+      return res.status(200).json({ status: 'ok' });
 
     } catch (error) {
       console.error('Error processing Razorpay webhook:', error);
