@@ -20,8 +20,7 @@ const setCorsHeaders = (req, res) => {
     console.log(`✅ CORS Allowed for: ${origin}`);
   }
   // If there's no origin header and it's the Razorpay webhook, allow it without warning.
-  else if (!origin && req.originalUrl === '/api/payment/verify-payment') {
-    // Allow all origins for this endpoint.
+  else if ((!origin || origin === 'undefined') && req.originalUrl.startsWith('/api/payment/verify-payment')) {
     res.setHeader('Access-Control-Allow-Origin', '*');
     console.log('ℹ️ Razorpay webhook: No Origin header, allowing by default.');
   } else {
