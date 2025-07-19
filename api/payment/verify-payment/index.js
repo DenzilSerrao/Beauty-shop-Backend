@@ -54,7 +54,7 @@ export default async function handler(req, res) {
         const razorpayOrderId = payload.payment.entity.order_id;
         const razorpayPaymentId = payload.payment.entity.id;
         const amount = payload.payment.entity.amount / 100; // Convert from paise to INR
-        const { orderId, userId } = payload.payment.entity.notes;
+        const { orderId } = payload.payment.entity.notes;
 
         // Check if payment already processed
         const existingPayment = await Payment.findOne({ razorpayPaymentId });

@@ -118,26 +118,41 @@ export const deleteOrder = asyncHandler(async (orderId, req, res) => {
   try {
     logger.info('Attempting to delete order', { orderId });
 
+    // Validate orderId format
     if (!mongoose.Types.ObjectId.isValid(orderId)) {
       const error = new ValidationError('Invalid order ID');
       await logger.error(error, req);
-      return res.status(400).json({ status: 'fail', message: error.message });
+      return res.status(400).json({ 
+        status: 'fail', 
+        message: error.message 
+      });
     }
 
-    const order = await Order.findByIdAndDelete(orderId);
+    // First find the order to check its status
+    const order = await Order.findById(orderId);
 
+    // Check if order exists
     if (!order) {
       const error = new NotFoundError('Order not found');
       await logger.error(error, req);
-      return res.status(404).json({ status: 'fail', message: error.message });
+      return res.status(404).json({ 
+        status: 'fail', 
+        message: error.message 
+      });
     }
 
-    logger.info('Successfully deleted order', { orderId });
+    // Now delete the order
+    await Order.findByIdAndDelete(orderId);
 
+    logger.info('Successfully deleted order', { orderId });
     return res.status(204).send();
+
   } catch (error) {
     await logger.error(error, req);
-    throw error;
+    return res.status(500).json({
+      status: 'error',
+      message: 'Internal server error'
+    });
   }
 });
 
