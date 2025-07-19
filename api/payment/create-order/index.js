@@ -49,6 +49,8 @@ export default async function handler(req, res) {
         customerPhone
       });
 
+      console.log('Order creation response:', orderResponse);
+
       if (orderResponse.status !== 'success') {
         return res.status(500).json({ error: 'Order creation failed' });
       }
