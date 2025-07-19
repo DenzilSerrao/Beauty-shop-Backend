@@ -65,7 +65,10 @@ export default async function handler(req, res) {
         }
 
         // Find order by Razorpay Order ID
-        const order = await Order.findOne({ _id: orderId });
+        const order = await Order.findOne({ _id: orderId }).populate({
+          path: 'userId',
+          model: 'User'
+        });
         if (!order || !order.userId) {
           console.error('Order or user not found');
           return res.status(404).json({ error: 'Order or user details not found' });
