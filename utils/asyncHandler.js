@@ -1,4 +1,3 @@
-// utils/asyncHandler.js
 import { logger } from './logger.js';
 
 export const asyncHandler = (fn) => async (req, res) => {

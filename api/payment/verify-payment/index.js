@@ -106,15 +106,15 @@ export default async function handler(req, res) {
         await sendEmail(order.userId.email, 'Order Confirmation', '', customerEmailBody);
 
         // Send email to owner
-        // const ownerEmailBody = `
-        //   <h2>New Order Received</h2>
-        //   <p><strong>Customer:</strong> ${order.userId.name} (${order.userId.email})</p>
-        //   <p><strong>Order ID:</strong> ${order._id}</p>
-        //   <p><strong>Amount:</strong> ₹${amount.toFixed(2)}</p>
-        //   <p><strong>Items Ordered:</strong></p>
-        //   <ul>${orderItems}</ul>
-        // `;
-        // await sendEmail(process.env.OWNER_EMAIL, 'New Order Received', '', ownerEmailBody);
+        const ownerEmailBody = `
+          <h2>New Order Received</h2>
+          <p><strong>Customer:</strong> ${order.userId.name} (${order.userId.email})</p>
+          <p><strong>Order ID:</strong> ${order._id}</p>
+          <p><strong>Amount:</strong> ₹${amount.toFixed(2)}</p>
+          <p><strong>Items Ordered:</strong></p>
+          <ul>${orderItems}</ul>
+        `;
+        await sendEmail(process.env.OWNER_EMAIL, 'New Order Received', '', ownerEmailBody);
         console.log('Payment processed and emails sent successfully and returned a status of 200');
         return res.status(200).json({ status: 'ok' });
       }
