@@ -48,7 +48,7 @@ export const getOrders = asyncHandler(async (req, res) => {
       items: order.items.map(item => {
         const product = productMap.get(item.name.trim());
         if (!product) {
-          logger.warn('Product not found for item', { itemName: item.name });
+          logger.error('Product not found for item', { itemName: item.name });
         }
         return {
           ...item.toObject(),
@@ -145,7 +145,10 @@ export const deleteOrder = asyncHandler(async (orderId, req, res) => {
     await Order.findByIdAndDelete(orderId);
 
     logger.info('Successfully deleted order', { orderId });
-    return res.status(204).send();
+    return res.status(204).json({
+      status: 'success',
+      message: 'Order deleted successfully'
+    });
 
   } catch (error) {
     await logger.error(error, req);
