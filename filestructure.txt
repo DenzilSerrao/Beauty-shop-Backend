@@ -40,6 +40,7 @@
     |-- products.js
 |-- lib
     |-- db.js
+    |-- dbLogger.js
 |-- middleware
     |-- auth.js
     |-- corsMiddleware.js
@@ -63,6 +64,7 @@
 |-- services
     |-- auth.service.js
     |-- email.service.js
+|-- tsconfig.json
 |-- utils
     |-- ana_beauty_logo.png
     |-- asyncHandler.js

@@ -2,11 +2,9 @@ import { corsMiddleware } from "../../../middleware/corsMiddleware.js";
 import { connectDB } from "../../../lib/db.js";
 import { Order } from "../../../models/order.js";
 import { Payment } from "../../../models/payment.js";
-import { User } from "../../../models/user.js";
 import { sendEmail } from "../../../services/email.service.js";
 import crypto from "crypto";
 import { logErrorToDatabase } from "../../../lib/dbLogger.js";
-import { ErrorLog } from "../../../models/ErrorLog.js";
 
 export default async function handler(req, res) {
   // Apply CORS middleware
