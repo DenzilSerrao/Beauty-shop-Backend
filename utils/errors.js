@@ -1,6 +1,17 @@
 // utils/error.js
-import { logger } from "./logger.js";
-import { logErrorToDatabase } from "../lib/dbLogger.js";
+// REMOVE these imports to break circular dependency
+// import { logger } from "./logger.js";
+// import { logErrorToDatabase } from "../lib/dbLogger.js";
+
+// Use simple console logging instead
+const logger = {
+  error: (message, error, req = null) => {
+    console.error("ERROR:", message);
+    if (error) console.error("Error details:", error.message, error.stack);
+    if (req) console.error("Request details:", req.method, req.url);
+  },
+  info: (message, data) => console.log("INFO:", message, data),
+};
 
 // Custom error classes (keep your existing ones)
 export class AppError extends Error {
@@ -34,32 +45,43 @@ export class NotFoundError extends AppError {
   }
 }
 
-// Enhanced error handler middleware with database logging
+// Enhanced error handler middleware
 export const errorHandler = async (err, req, res, next) => {
-  // Log to database first
+  // Log to console first
+  logger.error("Error occurred:", err, req);
+
+  // Try to log to database using dynamic import to avoid circular dependency
   try {
+    // Use dynamic import to break circular dependency
+    const { logErrorToDatabase } = await import("../lib/dbLogger.js");
     await logErrorToDatabase(err, req, {
       context: "Express error handler",
     });
   } catch (dbError) {
-    // If database logging fails, fall back to regular logger
-    logger.error("Failed to log error to database in error handler:", dbError);
-    logger.error("Original error:", err);
+    // If database logging fails, fall back to console logging
+    logger.error("Failed to log error to database:", dbError);
   }
 
   // Default error response
   const statusCode = err.statusCode || 500;
   const message = err.statusCode ? err.message : "Internal server error";
 
-  // Log to console as well
-  logger.error(err, req);
-
   res.status(statusCode).json({
     status: err.status || "error",
     message,
     ...(process.env.NODE_ENV === "development" && {
       stack: err.stack,
-      errorId: err._id, // If you want to return the error ID for debugging
     }),
   });
+};
+
+// Optional: Separate function for manual error logging if needed
+export const logError = async (error, context = {}) => {
+  try {
+    const { logErrorToDatabase } = await import("../lib/dbLogger.js");
+    return await logErrorToDatabase(error, null, context);
+  } catch (dbError) {
+    logger.error("Failed to log error:", dbError);
+    return null;
+  }
 };
