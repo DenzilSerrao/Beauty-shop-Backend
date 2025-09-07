@@ -48,6 +48,7 @@
     |-- userAuth.js
 |-- models
     |-- error.js
+    |-- ErrorLog.js
     |-- order.js
     |-- payment.js
     |-- product.js
