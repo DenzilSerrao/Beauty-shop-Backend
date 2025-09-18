@@ -80,11 +80,10 @@ export const getOrders = asyncHandler(async (req, res) => {
   }
 });
 
-export const getOrder = asyncHandler(async (req, res) => {
+export const getOrder = async (orderId, req = null) => {
   await connectDB();
 
   try {
-    const orderId = req.query.orderId || req.orderId; // Handle both cases
     logger.info("Fetching order details", { orderId });
 
     if (!mongoose.Types.ObjectId.isValid(orderId)) {
@@ -105,7 +104,7 @@ export const getOrder = asyncHandler(async (req, res) => {
     }
 
     // Check ownership
-    if (order.userId.toString() !== req.user.id) {
+    if (req && req.user && order.userId.toString() !== req.user.id) {
       const error = new NotFoundError(
         "Forbidden: User does not own this order"
       );
@@ -124,21 +123,19 @@ export const getOrder = asyncHandler(async (req, res) => {
     await logger.error(error, req);
     throw error;
   }
-});
+};
 
-export const deleteOrder = asyncHandler(async (req, res) => {
+export const deleteOrder = async (orderId, req = null) => {
   await connectDB();
 
   try {
-    // Get orderId from req.query (since it's passed from Vercel routing)
-    const orderId = req.query.orderId || req.orderId; // Handle both cases
-
     logger.info("Attempting to delete order", { orderId });
+    console.log("Attempting to delete order", { orderId });
 
     if (!orderId || !mongoose.Types.ObjectId.isValid(orderId)) {
       const error = new ValidationError("Invalid order ID");
       await logger.error(error, req);
-      throw error; // Throw instead of returning response
+      throw error;
     }
 
     const order = await Order.findByIdAndDelete(orderId);
@@ -146,7 +143,7 @@ export const deleteOrder = asyncHandler(async (req, res) => {
     if (!order) {
       const error = new NotFoundError("Order not found");
       await logger.error(error, req);
-      throw error; // Throw instead of returning response
+      throw error;
     }
 
     logger.info("Successfully deleted order", { orderId });
@@ -158,9 +155,9 @@ export const deleteOrder = asyncHandler(async (req, res) => {
     };
   } catch (error) {
     await logger.error(error, req);
-    throw error; // Let the handler catch and handle the error
+    throw error;
   }
-});
+};
 
 export const s_createOrder = async (orderData, req = null) => {
   const {
