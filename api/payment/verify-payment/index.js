@@ -208,36 +208,35 @@ export default async function handler(req, res) {
           });
         }
 
-        // // Send email to owner
-        // const ownerEmailBody = `
-        //   <h2>New Order Received</h2>
-        //   <p><strong>Customer:</strong> ${order.userId.name} (${
-        //   order.userId.email
-        // })</p>
-        //   <p><strong>Order ID:</strong> ${order._id}</p>
-        //   <p><strong>Amount:</strong> ₹${amount.toFixed(2)}</p>
-        //   <p><strong>Items Ordered:</strong></p>
-        //   <ul>${orderItems}</ul>
-        // `;
+        // Send email to owner
+        const ownerEmailBody = `
+          <h2>New Order Received</h2>
+          <p><strong>Customer:</strong> ${order.userId.name} (${
+          order.userId.email
+        })</p>
+          <p><strong>Order ID:</strong> ${order._id}</p>
+          <p><strong>Amount:</strong> ₹${amount.toFixed(2)}</p>
+          <p><strong>Items Ordered:</strong></p>
+          <ul>${orderItems}</ul>
+        `;
 
-        // try {
-        //   await sendEmail(
-        //     process.env.OWNER_EMAIL,
-        //     "New Order Received",
-        //     "",
-        //     ownerEmailBody
-        //   );
-        //   console.log("Owner email sent successfully");
-        // } catch (emailError) {
-        //   console.error("Failed to send owner email:", emailError);
-        //   await logErrorToDatabase(emailError, req, {
-        //     ...webhookContext,
-        //     context: "Owner email",
-        //     orderId: orderId,
-        //     ownerEmail: process.env.OWNER_EMAIL,
-        //   });
-        // Don't return error - continue with processing
-        // }
+        try {
+          await sendEmail(
+            process.env.OWNER_EMAIL,
+            "New Order Received",
+            "",
+            ownerEmailBody
+          );
+          console.log("Owner email sent successfully");
+        } catch (emailError) {
+          console.error("Failed to send owner email:", emailError);
+          await logErrorToDatabase(emailError, req, {
+            ...webhookContext,
+            context: "Owner email",
+            orderId: orderId,
+            ownerEmail: process.env.OWNER_EMAIL,
+          });
+        }
 
         console.log("Payment processed successfully");
         return res
