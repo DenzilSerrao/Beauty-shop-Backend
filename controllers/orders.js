@@ -80,16 +80,17 @@ export const getOrders = asyncHandler(async (req, res) => {
   }
 });
 
-export const getOrder = asyncHandler(async (orderId, req, res) => {
+export const getOrder = asyncHandler(async (req, res) => {
   await connectDB();
 
   try {
+    const orderId = req.query.orderId || req.orderId; // Handle both cases
     logger.info("Fetching order details", { orderId });
 
     if (!mongoose.Types.ObjectId.isValid(orderId)) {
       const error = new ValidationError("Invalid order ID");
       await logger.error(error, req);
-      return res.status(400).json({ status: "fail", message: error.message });
+      throw error;
     }
 
     const order = await Order.findById(orderId).populate(
@@ -100,7 +101,7 @@ export const getOrder = asyncHandler(async (orderId, req, res) => {
     if (!order) {
       const error = new NotFoundError("Order not found");
       await logger.error(error, req);
-      return res.status(404).json({ status: "fail", message: error.message });
+      throw error;
     }
 
     // Check ownership
@@ -110,15 +111,15 @@ export const getOrder = asyncHandler(async (orderId, req, res) => {
       );
       error.statusCode = 403;
       await logger.error(error, req);
-      return res.status(403).json({ status: "fail", message: error.message });
+      throw error;
     }
 
     logger.info("Successfully fetched order", { orderId });
 
-    return res.status(200).json({
+    return {
       status: "success",
       data: { order },
-    });
+    };
   } catch (error) {
     await logger.error(error, req);
     throw error;
@@ -129,13 +130,15 @@ export const deleteOrder = asyncHandler(async (req, res) => {
   await connectDB();
 
   try {
-    const { orderId } = req.params; // Get orderId from URL parameters
+    // Get orderId from req.query (since it's passed from Vercel routing)
+    const orderId = req.query.orderId || req.orderId; // Handle both cases
+
     logger.info("Attempting to delete order", { orderId });
 
-    if (!mongoose.Types.ObjectId.isValid(orderId)) {
+    if (!orderId || !mongoose.Types.ObjectId.isValid(orderId)) {
       const error = new ValidationError("Invalid order ID");
       await logger.error(error, req);
-      return res.status(400).json({ status: "fail", message: error.message });
+      throw error; // Throw instead of returning response
     }
 
     const order = await Order.findByIdAndDelete(orderId);
@@ -143,24 +146,19 @@ export const deleteOrder = asyncHandler(async (req, res) => {
     if (!order) {
       const error = new NotFoundError("Order not found");
       await logger.error(error, req);
-      return res.status(404).json({ status: "fail", message: error.message });
+      throw error; // Throw instead of returning response
     }
 
     logger.info("Successfully deleted order", { orderId });
 
-    return res.status(200).json({
+    return {
       status: "success",
       message: "Order Successfully Deleted",
       success: true,
-    });
+    };
   } catch (error) {
     await logger.error(error, req);
-
-    return res.status(500).json({
-      status: "error",
-      message: "Internal server error",
-      success: false,
-    });
+    throw error; // Let the handler catch and handle the error
   }
 });
 
