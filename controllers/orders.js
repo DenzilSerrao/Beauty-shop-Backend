@@ -125,10 +125,11 @@ export const getOrder = asyncHandler(async (orderId, req, res) => {
   }
 });
 
-export const deleteOrder = asyncHandler(async (orderId, req, res) => {
+export const deleteOrder = asyncHandler(async (req, res) => {
   await connectDB();
 
   try {
+    const { orderId } = req.params; // Get orderId from URL parameters
     logger.info("Attempting to delete order", { orderId });
 
     if (!mongoose.Types.ObjectId.isValid(orderId)) {
@@ -147,9 +148,10 @@ export const deleteOrder = asyncHandler(async (orderId, req, res) => {
 
     logger.info("Successfully deleted order", { orderId });
 
-    return res.status(204).json({
+    return res.status(200).json({
       status: "success",
       message: "Order Successfully Deleted",
+      success: true,
     });
   } catch (error) {
     await logger.error(error, req);
@@ -157,6 +159,7 @@ export const deleteOrder = asyncHandler(async (orderId, req, res) => {
     return res.status(500).json({
       status: "error",
       message: "Internal server error",
+      success: false,
     });
   }
 });
