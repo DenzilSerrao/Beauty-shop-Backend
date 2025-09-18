@@ -2,9 +2,11 @@ import { corsMiddleware } from "../../../middleware/corsMiddleware.js";
 import { connectDB } from "../../../lib/db.js";
 import { Order } from "../../../models/order.js";
 import { Payment } from "../../../models/payment.js";
+import { User } from "../../../models/user.js"; // Add this line
 import { sendEmail } from "../../../services/email.service.js";
 import crypto from "crypto";
 import { logErrorToDatabase } from "../../../lib/dbLogger.js";
+import { ErrorLog } from "../../../models/error.js";
 
 export default async function handler(req, res) {
   // Apply CORS middleware
@@ -170,9 +172,9 @@ export default async function handler(req, res) {
         const orderItems = order.items
           .map(
             (item) =>
-              `<li>${item.name} - ${item.quantity} x ₹${item.price.toFixed(
-                2
-              )}</li>`
+              `<li>${item.name} - ${item.quantity} x ₹${(
+                item.salePrice || 0
+              ).toFixed(2)}</li>`
           )
           .join("");
 
