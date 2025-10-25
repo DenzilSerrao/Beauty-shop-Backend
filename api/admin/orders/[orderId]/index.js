@@ -1,4 +1,4 @@
-import { AdmingetOrder, AdmindeleteOrder, updateOrderStatus } from '../../../../controllers/adminController.js'; // Ensure the path is correct
+import { AdmingetOrder, AdmindeleteOrder, updateOrderStatus } from '../../../../controllers/adminController.js'; 
 import { corsMiddleware } from '../../../../middleware/corsMiddleware.js';
 import isAdminAuth from '../../../../middleware/isAdminAuth.js';
 import { connectDB } from '../../../../lib/db.js';
