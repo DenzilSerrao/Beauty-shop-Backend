@@ -2,6 +2,7 @@ import { AdmingetOrder, AdmindeleteOrder, updateOrderStatus } from '../../../../
 import { corsMiddleware } from '../../../../middleware/corsMiddleware.js';
 import isAdminAuth from '../../../../middleware/isAdminAuth.js';
 import { connectDB } from '../../../../lib/db.js';
+import '../../../../controllers/orders.js'
 
 export default async function handler(req, res) {
   // Apply CORS middleware
