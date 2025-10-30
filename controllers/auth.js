@@ -4,6 +4,28 @@ import jwt from "jsonwebtoken";
 import { ValidationError, AuthenticationError } from "../utils/errors.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { logger } from "../utils/logger.js";
+import dns from "dns";
+import { promisify } from "util";
+
+const resolveMx = promisify(dns.resolveMx);
+
+// Email format validation
+const isValidEmailFormat = (email) => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
+
+// Verify email domain has MX records (can receive emails)
+const verifyEmailDomain = async (email) => {
+  const domain = email.split('@')[1];
+  try {
+    const addresses = await resolveMx(domain);
+    return addresses && addresses.length > 0;
+  } catch (error) {
+    logger.warn("Email domain verification failed", { domain, error: error.message });
+    return false;
+  }
+};
 
 export const register = asyncHandler(async (req, res) => {
   const { name, email, password } = req.body;
@@ -16,6 +38,23 @@ export const register = asyncHandler(async (req, res) => {
   if (!name || !email || !password) {
     const error = new ValidationError("Name, email, and password are required");
     error.context = { email };
+    throw error;
+  }
+
+  // Validate email format
+  if (!isValidEmailFormat(email)) {
+    const error = new ValidationError("Invalid email format. Please enter a valid email address.");
+    error.context = { email };
+    throw error;
+  }
+
+  // Verify email domain can receive emails
+  const isDomainValid = await verifyEmailDomain(email);
+  if (!isDomainValid) {
+    const error = new ValidationError(
+      "Email domain does not exist or cannot receive emails. Please check your email address."
+    );
+    error.context = { email, domain: email.split('@')[1] };
     throw error;
   }
 
@@ -51,7 +90,6 @@ export const register = asyncHandler(async (req, res) => {
   });
 });
 
-// controllers/auth.js
 export const login = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
@@ -148,12 +186,10 @@ export const verifyToken = asyncHandler(async (req, res) => {
     });
   } catch (err) {
     if (err.name === "JsonWebTokenError") {
-      // const error = new AuthenticationError('Invalid token');
       console.error("Invalid token:", err);
       err.statusCode = 401;
       throw err;
     } else if (err.name === "TokenExpiredError") {
-      // const error = new AuthenticationError('Token expired');
       console.error("Token expired:", err);
       err.statusCode = 401;
       throw err;
