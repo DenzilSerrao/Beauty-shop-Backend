@@ -80,72 +80,67 @@ export const getOrders = asyncHandler(async (req, res) => {
   }
 });
 
-export const getOrder = asyncHandler(async (orderId, req, res) => {
+export const getOrder = asyncHandler(async (req, res) => {
   await connectDB();
 
-  try {
-    logger.info("Fetching order details", { orderId });
+  const orderId = req.query.orderId;
 
-    if (!mongoose.Types.ObjectId.isValid(orderId)) {
-      const error = new ValidationError("Invalid order ID");
-      await logger.error(error, req);
-      return res.status(400).json({ status: "fail", message: error.message });
-    }
+  logger.info("Fetching order details", { orderId });
 
-    const order = await Order.findById(orderId).populate(
-      "userId",
-      "name email"
-    );
-
-    if (!order) {
-      const error = new NotFoundError("Order not found");
-      await logger.error(error, req);
-      return res.status(404).json({ status: "fail", message: error.message });
-    }
-
-    // Check ownership
-    if (order.userId.toString() !== req.user.id) {
-      const error = new NotFoundError(
-        "Forbidden: User does not own this order"
-      );
-      error.statusCode = 403;
-      await logger.error(error, req);
-      return res.status(403).json({ status: "fail", message: error.message });
-    }
-
-    logger.info("Successfully fetched order", { orderId });
-
-    return res.status(200).json({
-      status: "success",
-      data: { order },
-    });
-  } catch (error) {
+  if (!mongoose.Types.ObjectId.isValid(orderId)) {
+    const error = new ValidationError("Invalid order ID");
     await logger.error(error, req);
-    throw error;
+    return res.status(400).json({ status: "fail", message: error.message });
   }
+
+  const order = await Order.findById(orderId).populate("userId", "name email");
+
+  if (!order) {
+    const error = new NotFoundError("Order not found");
+    await logger.error(error, req);
+    return res.status(404).json({ status: "fail", message: error.message });
+  }
+
+  // Check ownership
+  if (order.userId.toString() !== req.user.id) {
+    const error = new NotFoundError("Forbidden: User does not own this order");
+    error.statusCode = 403;
+    await logger.error(error, req);
+    return res.status(403).json({ status: "fail", message: error.message });
+  }
+
+  logger.info("Successfully fetched order", { orderId });
+
+  return res.status(200).json({ status: "success", data: { order } });
 });
 
-export const deleteOrder = asyncHandler(async (orderId, req, res) => {
+export const deleteOrder = asyncHandler(async (req, res) => {
   await connectDB();
-  
+
+  const orderId = req.query.orderId;
+
   logger.info("Attempting to delete order", { orderId, timestamp: new Date().toISOString() });
 
   if (!mongoose.Types.ObjectId.isValid(orderId)) {
-    throw new ValidationError("Invalid order ID");
+    const error = new ValidationError("Invalid order ID");
+    await logger.error(error, req);
+    return res.status(400).json({ status: "fail", message: error.message });
   }
 
   // First find the order to check ownership
   const order = await Order.findById(orderId);
   
   if (!order) {
-    throw new NotFoundError("Order not found");
+    const error = new NotFoundError("Order not found");
+    await logger.error(error, req);
+    return res.status(404).json({ status: "fail", message: error.message });
   }
 
   // Check if the user owns this order
   if (order.userId.toString() !== req.user.id) {
     const error = new ValidationError("You are not authorized to delete this order");
-    error.statusCode = 403;
-    throw error;
+    await logger.error(error, req);
+    return res.status(403).json({ status: "fail", message: error.message });
   }
 
   // Now delete the order
@@ -158,7 +153,7 @@ export const deleteOrder = asyncHandler(async (orderId, req, res) => {
   });
 
   // For DELETE operations, send 204 without content
-  res.status(204).end();
+  return res.status(204).end();
 });
 
 export const s_createOrder = async (orderData, req = null) => {

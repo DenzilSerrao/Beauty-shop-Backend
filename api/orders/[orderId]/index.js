@@ -1,7 +1,8 @@
-import { getOrder, deleteOrder } from '../../../controllers/orders.js'; 
+import { getOrder, deleteOrder } from '../../../controllers/orders.js';
 import { corsMiddleware } from '../../../middleware/corsMiddleware.js';
 import userAuth from '../../../middleware/userAuth.js';
 import { connectDB } from '../../../lib/db.js';
+import { logger } from '../../../utils/logger.js';
 
 export default async function handler(req, res) {
   // Apply CORS middleware
@@ -31,25 +32,25 @@ export default async function handler(req, res) {
 
   try {
     const orderId = req.query.orderId;
-    logger.info('Processing request', { 
-      orderId, 
+    logger.info('Processing request', {
+      orderId,
       method: req.method,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
 
     switch (req.method) {
       case 'GET':
-        await getOrder(orderId, req, res);
+        await getOrder(req, res);
         break;
 
       case 'DELETE':
-        await deleteOrder(orderId, req, res);
+        await deleteOrder(req, res);
         break;
 
       default:
-        res.status(405).json({ 
+        return res.status(405).json({
           status: 'error',
-          message: 'Method Not Allowed' 
+          message: 'Method Not Allowed',
         });
     }
   } catch (error) {
