@@ -1,4 +1,4 @@
-import { getOrder, deleteOrder } from '../../../controllers/orders.js';
+import { getOrder, deleteOrder } from '../../../controllers/orders.js'; 
 import { corsMiddleware } from '../../../middleware/corsMiddleware.js';
 import userAuth from '../../../middleware/userAuth.js';
 import { connectDB } from '../../../lib/db.js';
@@ -29,30 +29,26 @@ export default async function handler(req, res) {
   }
   console.log('User authentication successful');
 
-  const { orderId } = req.query; // Access the orderId from req.query
-
   try {
     switch (req.method) {
       case 'GET':
-        console.log('Handling GET request for order:', orderId);
-        const order = await getOrder(orderId, req, res);
+        console.log('Handling GET request for order:', req.query.orderId);
+        order = await getOrder(req, res);
         console.log('Order fetched successfully:', order);
-        res.status(200).json(order);
-        break;
+        return; // controller sent response
 
       case 'DELETE':
-        console.log('Handling DELETE request for order:', orderId);
-        await deleteOrder(orderId, req, res);
-        console.log('Order deleted successfully');
-        res.status(200).json({ success: true, message: 'Order deleted successfully' });
-        break;
+        console.log('Handling DELETE request for order:', req.query.orderId);
+        order = await deleteOrder(req, res);
+        console.log('Order deleted successfully:', order);
+        return; // controller sent response
 
       default:
         console.log('Method not allowed:', req.method);
-        res.status(405).json({ error: 'Method Not Allowed' });
+        return res.status(405).json({ error: 'Method Not Allowed' });
     }
   } catch (error) {
     console.error('Order error:', error);
-    res.status(500).json({ error: error.message });
+    return res.status(500).json({ error: error.message });
   }
 }
