@@ -129,7 +129,7 @@ export const deleteOrder = asyncHandler(async (orderId, req, res) => {
   await connectDB();
 
   try {
-    logger.info("Attempting to delete order", { orderId });
+    logger.info("Attempting to delete order", { orderId, timestamp: new Date().toISOString() });
 
     if (!mongoose.Types.ObjectId.isValid(orderId)) {
       const error = new ValidationError("Invalid order ID");
@@ -137,27 +137,37 @@ export const deleteOrder = asyncHandler(async (orderId, req, res) => {
       return res.status(400).json({ status: "fail", message: error.message });
     }
 
-    const order = await Order.findByIdAndDelete(orderId);
-
+    // First find the order to check ownership
+    const order = await Order.findById(orderId);
+    
     if (!order) {
       const error = new NotFoundError("Order not found");
       await logger.error(error, req);
       return res.status(404).json({ status: "fail", message: error.message });
     }
 
-    logger.info("Successfully deleted order", { orderId });
+    // Check if the user owns this order
+    if (order.userId.toString() !== req.user.id) {
+      const error = new ValidationError("You are not authorized to delete this order");
+      await logger.error(error, req);
+      return res.status(403).json({ status: "fail", message: error.message });
+    }
 
-    return res.status(204).json({
-      status: "success",
-      message: "Order Successfully Deleted",
-    });
+    // Now delete the order
+    await Order.findByIdAndDelete(orderId);
+
+    logger.info("Successfully deleted order", { orderId, userId: req.user.id });
+
+    // For DELETE operations, it's better to send 204 without content
+    return res.status(204).send();
   } catch (error) {
     await logger.error(error, req);
-
-    return res.status(500).json({
-      status: "error",
-      message: "Internal server error",
-    });
+    if (!res.headersSent) {
+      return res.status(500).json({
+        status: "error",
+        message: "Internal server error",
+      });
+    }
   }
 });
 

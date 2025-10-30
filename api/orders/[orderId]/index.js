@@ -30,18 +30,19 @@ export default async function handler(req, res) {
   console.log('User authentication successful');
 
   try {
+    const orderId = req.query.orderId;
+    console.log('Processing request for orderId:', orderId);
+
     switch (req.method) {
       case 'GET':
-        console.log('Handling GET request for order:', req.query.orderId);
-        order = await getOrder(req, res);
-        console.log('Order fetched successfully:', order);
-        return; // controller sent response
+        console.log('Handling GET request for order:', orderId);
+        await getOrder(orderId, req, res);
+        break;
 
       case 'DELETE':
-        console.log('Handling DELETE request for order:', req.query.orderId);
-        order = await deleteOrder(req, res);
-        console.log('Order deleted successfully:', order);
-        return; // controller sent response
+        console.log('Handling DELETE request for order:', orderId);
+        await deleteOrder(orderId, req, res);
+        break;
 
       default:
         console.log('Method not allowed:', req.method);
@@ -49,6 +50,9 @@ export default async function handler(req, res) {
     }
   } catch (error) {
     console.error('Order error:', error);
-    return res.status(500).json({ error: error.message });
+    // Only send error response if headers haven't been sent yet
+    if (!res.headersSent) {
+      return res.status(500).json({ error: error.message });
+    }
   }
 }
