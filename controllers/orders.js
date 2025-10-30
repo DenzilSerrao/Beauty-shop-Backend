@@ -127,48 +127,38 @@ export const getOrder = asyncHandler(async (orderId, req, res) => {
 
 export const deleteOrder = asyncHandler(async (orderId, req, res) => {
   await connectDB();
+  
+  logger.info("Attempting to delete order", { orderId, timestamp: new Date().toISOString() });
 
-  try {
-    logger.info("Attempting to delete order", { orderId, timestamp: new Date().toISOString() });
-
-    if (!mongoose.Types.ObjectId.isValid(orderId)) {
-      const error = new ValidationError("Invalid order ID");
-      await logger.error(error, req);
-      return res.status(400).json({ status: "fail", message: error.message });
-    }
-
-    // First find the order to check ownership
-    const order = await Order.findById(orderId);
-    
-    if (!order) {
-      const error = new NotFoundError("Order not found");
-      await logger.error(error, req);
-      return res.status(404).json({ status: "fail", message: error.message });
-    }
-
-    // Check if the user owns this order
-    if (order.userId.toString() !== req.user.id) {
-      const error = new ValidationError("You are not authorized to delete this order");
-      await logger.error(error, req);
-      return res.status(403).json({ status: "fail", message: error.message });
-    }
-
-    // Now delete the order
-    await Order.findByIdAndDelete(orderId);
-
-    logger.info("Successfully deleted order", { orderId, userId: req.user.id });
-
-    // For DELETE operations, it's better to send 204 without content
-    return res.status(204).send();
-  } catch (error) {
-    await logger.error(error, req);
-    if (!res.headersSent) {
-      return res.status(500).json({
-        status: "error",
-        message: "Internal server error",
-      });
-    }
+  if (!mongoose.Types.ObjectId.isValid(orderId)) {
+    throw new ValidationError("Invalid order ID");
   }
+
+  // First find the order to check ownership
+  const order = await Order.findById(orderId);
+  
+  if (!order) {
+    throw new NotFoundError("Order not found");
+  }
+
+  // Check if the user owns this order
+  if (order.userId.toString() !== req.user.id) {
+    const error = new ValidationError("You are not authorized to delete this order");
+    error.statusCode = 403;
+    throw error;
+  }
+
+  // Now delete the order
+  await Order.findByIdAndDelete(orderId);
+
+  logger.info("Successfully deleted order", { 
+    orderId, 
+    userId: req.user.id,
+    timestamp: new Date().toISOString() 
+  });
+
+  // For DELETE operations, send 204 without content
+  res.status(204).end();
 });
 
 export const s_createOrder = async (orderData, req = null) => {

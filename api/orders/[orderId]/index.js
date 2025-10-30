@@ -31,28 +31,38 @@ export default async function handler(req, res) {
 
   try {
     const orderId = req.query.orderId;
-    console.log('Processing request for orderId:', orderId);
+    logger.info('Processing request', { 
+      orderId, 
+      method: req.method,
+      timestamp: new Date().toISOString()
+    });
 
     switch (req.method) {
       case 'GET':
-        console.log('Handling GET request for order:', orderId);
         await getOrder(orderId, req, res);
         break;
 
       case 'DELETE':
-        console.log('Handling DELETE request for order:', orderId);
         await deleteOrder(orderId, req, res);
         break;
 
       default:
-        console.log('Method not allowed:', req.method);
-        return res.status(405).json({ error: 'Method Not Allowed' });
+        res.status(405).json({ 
+          status: 'error',
+          message: 'Method Not Allowed' 
+        });
     }
   } catch (error) {
-    console.error('Order error:', error);
-    // Only send error response if headers haven't been sent yet
+    // Let asyncHandler handle the error response
     if (!res.headersSent) {
-      return res.status(500).json({ error: error.message });
+      const statusCode = error.statusCode || 500;
+      const message = statusCode === 500 ? 'Internal server error' : error.message;
+      
+      res.status(statusCode).json({
+        status: 'error',
+        message,
+        ...(process.env.NODE_ENV === 'development' && { stack: error.stack })
+      });
     }
   }
 }
