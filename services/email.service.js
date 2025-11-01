@@ -1,16 +1,24 @@
 import nodemailer from 'nodemailer';
 
+// TODO: REMOVE BEFORE PRODUCTION!
+const EMAIL_CONFIG = {
+  user: 'anaofficialproduct@gmail.com',      // Replace with your Gmail
+  pass: 'raak ydyi hihx kxni' // Replace with your app password
+};
+
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  host: 'smtp.gmail.com',
+  port: 587,
+  secure: false,
   auth: {
-    user: process.env.EMAIL_USER, // Your email
-    pass: process.env.EMAIL_PASS, // Your email password or app password
-  },
+    user: EMAIL_CONFIG.user,
+    pass: EMAIL_CONFIG.pass
+  }
 });
 
 export const sendEmail = async (to, subject, text, html) => {
   const mailOptions = {
-    from: process.env.EMAIL_USER,
+    from: `"Beauty Shop" <${EMAIL_CONFIG.user}>`,
     to,
     subject,
     text,
