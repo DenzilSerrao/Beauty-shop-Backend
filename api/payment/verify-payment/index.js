@@ -6,7 +6,7 @@ import { User } from "../../../models/user.js";
 import { sendEmail } from "../../../services/email.service.js";
 import crypto from "crypto";
 import { logErrorToDatabase } from "../../../lib/dbLogger.js";
-import { ErrorLog } from "../../../models/ErrorLog.js";
+import { ErrorLog } from "../../../models/error.js";
 
 export default async function handler(req, res) {
   // Apply CORS middleware
